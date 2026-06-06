@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "ExitPlanMode",
+      "hooks": [
+        { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/save-plan-to-repo.sh\"", "timeout": 15 },
+        { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/plan-dispatch.sh\"", "timeout": 30 }
+      ]
+    }]
+  }
+}

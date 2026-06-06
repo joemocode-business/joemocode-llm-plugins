@@ -1,0 +1,17 @@
+{
+  "name": "joemocode-llm-plugins",
+  "owner": { "name": "Joe MoCode" },
+  "metadata": {
+    "description": "LLM agent plugins for Claude Code and Cursor",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "plan-to-agents",
+      "source": "./plugins/plan-to-agents",
+      "description": "Post-plan agent delegation: Claude→Cursor CLI, Cursor→Task subagents",
+      "version": "0.1.0",
+      "strict": true
+    }
+  ]
+}

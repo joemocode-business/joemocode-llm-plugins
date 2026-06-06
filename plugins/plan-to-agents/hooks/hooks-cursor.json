@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [{
+      "command": "./hooks/sync-plan-to-workspace.sh"
+    }]
+  }
+}
