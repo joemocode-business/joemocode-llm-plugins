@@ -57,21 +57,16 @@ flowchart TB
 
 ## Install
 
-### Claude Code
+Same two commands in Claude Code or Cursor (one-time per machine):
 
 ```text
 /plugin marketplace add joemocode-business/joemocode-llm-plugins
 /plugin install plan-to-agents@joemocode-llm-plugins
 ```
 
-### Cursor
+Restart after install. Updates: `/plugin marketplace update joemocode-llm-plugins` then `/plugin update plan-to-agents@joemocode-llm-plugins`.
 
-```text
-/plugin marketplace add joemocode-business/joemocode-llm-plugins
-/plugin install plan-to-agents@joemocode-llm-plugins
-```
-
-Restart the host after installing so hooks and skills load.
+See the [marketplace README](../../README.md) for optional project-level `extraKnownMarketplaces` setup.
 
 ---
 

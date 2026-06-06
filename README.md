@@ -2,14 +2,60 @@
 
 Joe's personal plugin library for sharing — dual-platform plugins for [Claude Code](https://code.claude.com/docs/en/quickstart) and [Cursor](https://cursor.com). Each plugin ships manifests for both environments.
 
-## Recommended stack: Plannotator + plan-to-agents
+## Install (one-time per machine)
 
-For the full plan workflow, pair **[Plannotator](https://github.com/backnotprop/plannotator)** with `plan-to-agents`:
+Add the marketplace once, then install plugins by name. Works the same in **Claude Code** and **Cursor**:
+
+```text
+/plugin marketplace add joemocode-business/joemocode-llm-plugins
+/plugin install plan-to-agents@joemocode-llm-plugins
+```
+
+Restart after install so hooks and skills load.
+
+**Marketplace name:** install commands use `@joemocode-llm-plugins` — that is the `name` in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json), not necessarily the GitHub repo slug.
+
+**Private repo:** ensure your git credentials work for `joemocode-business/joemocode-llm-plugins` (e.g. `gh auth login`). For Claude Code background updates, set `GITHUB_TOKEN` or `GH_TOKEN` if needed.
+
+### Updates
+
+After a new release is pushed to GitHub:
+
+```text
+/plugin marketplace update joemocode-llm-plugins
+/plugin update plan-to-agents@joemocode-llm-plugins
+```
+
+### Optional — auto-suggest in a project
+
+To prompt install when someone trusts a repo, add to `.claude/settings.json`:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "joemocode-llm-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "joemocode-business/joemocode-llm-plugins"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "plan-to-agents@joemocode-llm-plugins": true
+  }
+}
+```
+
+Plugin details, migration from global hooks, and test checklist: [plugins/plan-to-agents/README.md](./plugins/plan-to-agents/README.md).
+
+---
+
+## Recommended stack: Plannotator + plan-to-agents
 
 | Stage | Tool | Role |
 |-------|------|------|
-| Before approval | Plannotator | Interactive plan review — annotate, refine, approve or request changes |
-| After approval | plan-to-agents | Save the plan into the repo and route implementation |
+| Before approval | [Plannotator](https://github.com/backnotprop/plannotator) | Interactive plan review |
+| After approval | plan-to-agents | Save plan to repo and route implementation |
 
 **Plannotator — Claude Code:**
 
@@ -27,31 +73,19 @@ for skill in plannotator-annotate plannotator-review plannotator-last plannotato
 done
 ```
 
-Restart after install. See [Plannotator docs](https://plannotator.ai/docs/getting-started/installation/) for details.
+Restart after install. See [Plannotator docs](https://plannotator.ai/docs/getting-started/installation/).
 
 ---
-
-## Install plugins from this marketplace
-
-### Claude Code
-
-```text
-/plugin marketplace add joemocode-business/joemocode-llm-plugins
-/plugin install plan-to-agents@joemocode-llm-plugins
-```
-
-### Cursor
-
-```text
-/plugin marketplace add joemocode-business/joemocode-llm-plugins
-/plugin install plan-to-agents@joemocode-llm-plugins
-```
 
 ## Plugins
 
 | Plugin | Description |
 |--------|-------------|
 | [plan-to-agents](./plugins/plan-to-agents/README.md) | Post-plan agent delegation: Claude→Cursor CLI, Cursor→Task subagents |
+
+## Roadmap
+
+[docs/FUTURE.md](./docs/FUTURE.md) — publish to GitHub, Cursor Team Marketplace, Cursor plan hooks, cloud agent automation, CI, public catalog listing.
 
 ## Validate
 

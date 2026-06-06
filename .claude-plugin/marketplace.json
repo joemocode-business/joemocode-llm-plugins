@@ -1,6 +1,6 @@
 {
   "name": "joemocode-llm-plugins",
-  "owner": { "name": "Joe MoCode" },
+  "owner": { "name": "Joe Muoio" },
   "metadata": {
     "description": "LLM agent plugins for Claude Code and Cursor",
     "version": "0.1.0"
