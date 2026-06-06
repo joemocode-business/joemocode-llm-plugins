@@ -55,31 +55,6 @@ flowchart TB
 
 ---
 
-## Prerequisites
-
-### Claude Code
-
-```bash
-curl -fsSL https://claude.ai/install.sh | bash   # macOS / Linux / WSL
-claude --version
-```
-
-Windows: `irm https://claude.ai/install.ps1 | iex`. See [Claude Code quickstart](https://code.claude.com/docs/en/quickstart).
-
-### Cursor Agent CLI
-
-Required when Claude orchestrates local implementation (Branch C of `plan-dispatch`):
-
-```bash
-curl https://cursor.com/install -fsS | bash
-echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc
-agent --version
-```
-
-Windows: `irm 'https://cursor.com/install?win32=true' | iex`. See [Cursor CLI installation](https://cursor.com/docs/cli/installation).
-
----
-
 ## Install
 
 ### Claude Code
@@ -232,17 +207,7 @@ Parses task goal, files, and acceptance criteria; asks local subagent vs Cursor 
 
 ### Install Plannotator
 
-**CLI** (required by both Claude Code and Cursor):
-
-```bash
-curl -fsSL https://plannotator.ai/install.sh | bash   # macOS / Linux / WSL
-```
-
-```powershell
-irm https://plannotator.ai/install.ps1 | iex            # Windows PowerShell
-```
-
-**Claude Code plugin** (automatic Plan Mode hooks on `ExitPlanMode`):
+**Claude Code** (automatic Plan Mode hooks on `ExitPlanMode`):
 
 ```text
 /plugin marketplace add backnotprop/plannotator
@@ -267,12 +232,6 @@ No conflicts between the two plugins — install both independently.
 ---
 
 ## Test checklist
-
-### Prerequisites
-
-- [ ] `claude --version` works (Claude Code native install)
-- [ ] `agent --version` works (Cursor Agent CLI — needed for Claude→Composer dispatch)
-- [ ] `plannotator --version` works; Plannotator plugin installed in Claude Code (optional but recommended)
 
 ### Claude Code
 
