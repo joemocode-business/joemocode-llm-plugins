@@ -3,6 +3,5 @@
   "description": "Route approved plans to implementers: Claude→Cursor CLI or Cursor→Task subagents",
   "author": { "name": "Joe MoCode" },
   "repository": "https://github.com/joemocode-business/joemocode-llm-plugins",
-  "keywords": ["planning", "delegation", "hooks", "ExitPlanMode", "subagents"],
-  "hooks": "./hooks/hooks.json"
+  "keywords": ["planning", "delegation", "hooks", "ExitPlanMode", "subagents"]
 }
