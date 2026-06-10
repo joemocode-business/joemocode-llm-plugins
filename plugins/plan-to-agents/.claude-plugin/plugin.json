@@ -1,6 +1,5 @@
 {
   "name": "plan-to-agents",
-  "version": "0.1.0",
   "description": "Route approved plans to implementers: Claude→Cursor CLI or Cursor→Task subagents",
   "author": { "name": "Joe MoCode" },
   "repository": "https://github.com/joemocode-business/joemocode-llm-plugins",

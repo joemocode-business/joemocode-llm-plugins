@@ -1,0 +1,15 @@
+{
+  "extraKnownMarketplaces": {
+    "joemocode-llm-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "joemocode-business/joemocode-llm-plugins"
+      },
+      "autoUpdate": true
+    }
+  },
+  "enabledPlugins": {
+    "session-handoff@joemocode-llm-plugins": true,
+    "plan-to-agents@joemocode-llm-plugins": true
+  }
+}

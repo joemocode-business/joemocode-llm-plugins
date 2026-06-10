@@ -1,6 +1,5 @@
 {
   "name": "session-handoff",
-  "version": "0.1.0",
   "description": "Compact the current conversation into a handoff document for a fresh agent to continue",
   "author": { "name": "Joe MoCode" },
   "repository": "https://github.com/joemocode-business/joemocode-llm-plugins",
