@@ -101,7 +101,7 @@ Candidates (add to `marketplace.json` + `plugins/<name>/`):
 ## Non-goals (for now)
 
 - Replacing Plannotator’s interactive review UI
-- Supporting npm-published plugin sources (git-only is fine for personal sharing)
+- Supporting registry-published plugin sources (git-only is fine for personal sharing)
 - Bundling repo-specific lint/test commands inside generic implementer agents
 
 ---

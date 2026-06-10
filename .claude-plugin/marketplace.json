@@ -12,6 +12,13 @@
       "description": "Post-plan agent delegation: Claude→Cursor CLI, Cursor→Task subagents",
       "version": "0.1.0",
       "strict": true
+    },
+    {
+      "name": "session-handoff",
+      "source": "./plugins/session-handoff",
+      "description": "Compact the current conversation into a handoff document for a fresh agent to continue",
+      "version": "0.1.0",
+      "strict": true
     }
   ]
 }

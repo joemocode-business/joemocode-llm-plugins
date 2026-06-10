@@ -82,6 +82,15 @@ Restart after install. See [Plannotator docs](https://plannotator.ai/docs/gettin
 | Plugin | Description |
 |--------|-------------|
 | [plan-to-agents](./plugins/plan-to-agents/README.md) | Post-plan agent delegation: Claude→Cursor CLI, Cursor→Task subagents |
+| [session-handoff](./plugins/session-handoff/README.md) | Compact the current conversation into a handoff doc for a fresh agent (forked from [mattpocock/skills](https://github.com/mattpocock/skills)) |
+
+## Related external skills
+
+Skills worth installing from upstream rather than re-publishing here. They install per-machine and update by re-running their installer.
+
+| Source | Get it | Notes |
+|--------|--------|-------|
+| [mattpocock/skills](https://github.com/mattpocock/skills) — incl. `write-a-skill` | `pnpx skills@latest add mattpocock/skills` | Picker CLI; choose individual skills and target agent(s) (Claude Code and Cursor). Not a marketplace — `/plugin marketplace add` does not apply. |
 
 ## Roadmap
 
