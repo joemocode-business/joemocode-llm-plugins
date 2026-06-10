@@ -20,14 +20,14 @@ Read `plan-template.md` in **this skill's directory** (same folder as this file)
 
 ## 3. Write frontmatter
 
-At the top of the plan (after any HTML comment block from the template), include YAML frontmatter with:
+The plan file must **start on line 1** with YAML frontmatter (no leading comment or blank line, or parsers won't recognize it):
 
 | Key | Value |
 |-----|-------|
 | `title` | Your human-readable plan title |
 | `created` | Today's date (`YYYY-MM-DD`) |
-| `last_updated` | Today's date (`YYYY-MM-DD`) |
-| `status` | `draft` |
+| `last_updated` | Today's date (`YYYY-MM-DD`) — bump to today on every edit |
+| `status` | One of `draft`, `approved`, `implemented`; start at `draft` |
 
 Use the **actual session/current date** — do not guess or use a placeholder.
 
@@ -40,6 +40,8 @@ The on-disk filename must be:
 ```
 YYYY-MM-DD-<descriptive-kebab-name>.md
 ```
+
+where the date is the day the plan was created and the name is a 3–6 word kebab-case summary of the task (not a random slug) — e.g. `2026-06-10-add-last-updated-frontmatter.md`.
 
 In Claude Code Plan Mode the harness fixes the path while you draft; the **plan-dispatch** skill performs the final rename at save time. To make that rename unambiguous, record the intended filename in the plan body (e.g. a short note near the top or in a `## Metadata` line):
 
