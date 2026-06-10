@@ -50,6 +50,8 @@ flowchart TB
 | **Skill** | `skills/plan-dispatch/SKILL.md` | Claude-primary: 3-way post-approval dispatch |
 | **Skill** | `skills/implement-plan/SKILL.md` | Cursor-primary: phase-based Task orchestration + verification |
 | **Skill** | `skills/agent-handoff/SKILL.md` | Both: explicit delegation without plan approval |
+| **Skill** | `skills/planning/SKILL.md` | Both: guides plan writing — descriptive dated filename + frontmatter |
+| **Template** | `skills/planning/plan-template.md` | Canonical plan skeleton: filename convention + frontmatter `title` / `created` / `last_updated` / `status` |
 | **Agent** | `agents/plan-phase-implementer.md` | Implements one phase/group from a plan file |
 | **Agent** | `agents/plan-verifier.md` | Verifies acceptance criteria from the diff |
 
@@ -141,6 +143,8 @@ On Cursor, the `Task` tool is built-in; no extra CLI permissions are needed for 
 
 Recommend git-tracking repo plan directories so approved plans travel with the codebase.
 
+Saved plans follow the `YYYY-MM-DD-<descriptive-name>.md` naming convention and carry a `last_updated` frontmatter field (bumped on every edit).
+
 **Debug sync:** set `CURSOR_PLAN_SYNC_DEBUG=1` to log mirror copies to stderr:
 
 ```bash
@@ -150,6 +154,14 @@ export CURSOR_PLAN_SYNC_DEBUG=1
 ---
 
 ## Skills
+
+### `planning` (both)
+
+Guides plan writing in Plan Mode or when drafting/refining a plan. Invoked for requests like "write a plan", "draft a plan", or "plan this".
+
+- **Filename:** `YYYY-MM-DD-<descriptive-name>.md` — the date is the day the plan was created; the name is a 3–6 word kebab-case summary of the task. Names must be descriptive, not random harness slugs.
+- **Frontmatter:** `title`, `created`, `last_updated`, `status` — set `created` and `last_updated` to today's date on first write; bump `last_updated` on every subsequent edit; `status` is one of `draft`, `approved`, or `implemented`.
+- **Template:** [`skills/planning/plan-template.md`](skills/planning/plan-template.md) is the source of truth for filename convention and frontmatter structure.
 
 ### `plan-dispatch` (Claude)
 

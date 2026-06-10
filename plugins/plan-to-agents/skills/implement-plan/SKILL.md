@@ -33,6 +33,8 @@ If no acceptance criteria section exists, derive criteria from the plan's "after
 
 ## 4. Spawn implementers
 
+For parallelizable phase groups, each `Task` subagent should work in its own branch/worktree off the current feature branch and commit there — mirroring plan-dispatch Branch C — so per-phase diffs are reviewable as separate branches before merging back.
+
 For each independent group, fire a `Task` tool call using the `plan-phase-implementer` subagent.
 Fire all independent groups **in the same response** (parallel).
 
