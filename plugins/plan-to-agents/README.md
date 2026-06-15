@@ -62,9 +62,11 @@ flowchart TB
 Same two commands in Claude Code or Cursor (one-time per machine):
 
 ```text
-/plugin marketplace add joemocode-business/joemocode-llm-plugins
+/plugin marketplace add https://github.com/joemocode-business/joemocode-llm-plugins
 /plugin install plan-to-agents@joemocode-llm-plugins
 ```
+
+Cursor requires the full `https://github.com/...` URL above; the `owner/repo` shorthand is Claude Code only.
 
 Restart after install. Updates: `/plugin marketplace update joemocode-llm-plugins` then `/plugin update plan-to-agents@joemocode-llm-plugins`.
 

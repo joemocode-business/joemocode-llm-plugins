@@ -15,9 +15,11 @@ Distinct from this library's [`agent-handoff`](../plan-to-agents/skills/agent-ha
 Same two commands in Claude Code or Cursor (one-time per machine):
 
 ```text
-/plugin marketplace add joemocode-business/joemocode-llm-plugins
+/plugin marketplace add https://github.com/joemocode-business/joemocode-llm-plugins
 /plugin install session-handoff@joemocode-llm-plugins
 ```
+
+Cursor requires the full `https://github.com/...` URL above; the `owner/repo` shorthand is Claude Code only.
 
 Restart after install.
 

@@ -7,11 +7,13 @@ Joe's personal plugin library for sharing — dual-platform plugins for [Claude 
 Add the marketplace once, then install plugins by name. Works the same in **Claude Code** and **Cursor**:
 
 ```text
-/plugin marketplace add joemocode-business/joemocode-llm-plugins
+/plugin marketplace add https://github.com/joemocode-business/joemocode-llm-plugins
 /plugin install plan-to-agents@joemocode-llm-plugins
 ```
 
 Restart after install so hooks and skills load.
+
+> **Cursor:** use the full `https://github.com/...` URL as shown. The `owner/repo` shorthand only works in Claude Code — Cursor's CLI rejects it and prompts for a URL.
 
 **Marketplace name:** install commands use `@joemocode-llm-plugins` — that is the `name` in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json), not necessarily the GitHub repo slug.
 
@@ -60,7 +62,7 @@ Plugin details, migration from global hooks, and test checklist: [plugins/plan-t
 **Plannotator — Claude Code:**
 
 ```text
-/plugin marketplace add backnotprop/plannotator
+/plugin marketplace add https://github.com/backnotprop/plannotator
 /plugin install plannotator@plannotator
 ```
 
