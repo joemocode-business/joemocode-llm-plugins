@@ -47,17 +47,40 @@ implement anything.
 
 ---
 
-## Branch B — Cursor cloud (manual)
+## Branch B — Cursor cloud (publish + hand off)
 
-There is no clean one-shot local CLI to launch a Cursor cloud/background agent, so this is a manual
-hand-off today:
+A cloud agent clones from `origin`, so the plan must be pushed to a branch first. Publish it to a
+dedicated `plan/<slug>` branch so the cloud agent's work stacks on the plan commit and the PR comes
+from `plan/<slug>` — `develop` and any feature branch stay untouched.
 
-1. Tell the user the saved plan path:
-   `<CWD>/.claude/plans/YYYY-MM-DD-<descriptive-kebab-name>.md`.
-2. Instruct them to open Cursor → Background/Cloud Agents (the cloud icon in the Cursor IDE, or
-   https://cursor.com/agents) and start an agent against **this repo**, pointing it at that plan
-   file.
-3. Hand off and stop. Make no local edits and no API calls.
+`<slug>` = the conformed plan filename without extension (e.g. `2026-06-17-reduce-handoff-friction`).
+
+### B1. Publish the plan to a dedicated branch
+
+Branch `plan/<slug>` off the current branch, commit **only the plan file**, and push:
+
+    base=$(git rev-parse --abbrev-ref HEAD)
+    branch="plan/<slug>"
+    plan_file=".claude/plans/<conformed-filename>.md"
+
+    git checkout -b "$branch" "$base"
+    git add "$plan_file"
+    git commit -m "Add plan: <slug>"
+    git push -u origin "$branch"
+
+Guardrails:
+
+- **No `origin` remote**: stop — a cloud agent needs a pushed branch. Offer "Save plan only" or
+  Branch C (local) instead.
+- **Branch already exists** (locally or on origin): append a suffix (`plan/<slug>-2`).
+- **Other uncommitted changes**: stage only the plan file, never the user's unrelated work.
+
+### B2. Hand off
+
+1. Tell the user the pushed branch `plan/<slug>`.
+2. Have them start a Cursor Background/Cloud Agent (https://cursor.com/agents) against **this repo on
+   `plan/<slug>`**, pointed at `<CWD>/.claude/plans/<conformed-filename>.md`.
+3. Stop. Make no further edits and no API calls.
 
 ---
 
