@@ -3,6 +3,6 @@
   "description": "Compact the current conversation into a handoff document for a fresh agent to continue",
   "author": { "name": "Joe MoCode" },
   "repository": "https://github.com/joemocode-business/joemocode-llm-plugins",
-  "keywords": ["handoff", "context", "compaction", "session", "continuity"],
+  "keywords": ["handoff", "context", "compaction", "precompact", "hooks", "research", "session", "continuity"],
   "skills": "./skills/"
 }
