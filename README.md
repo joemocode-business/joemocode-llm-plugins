@@ -84,7 +84,7 @@ Restart after install. See [Plannotator docs](https://plannotator.ai/docs/gettin
 | Plugin | Description |
 |--------|-------------|
 | [plan-to-agents](./plugins/plan-to-agents/README.md) | Post-plan agent delegation: Claude→Cursor CLI, Cursor→Task subagents |
-| [session-handoff](./plugins/session-handoff/README.md) | Compact the current conversation into a handoff doc for a fresh agent (forked from [mattpocock/skills](https://github.com/mattpocock/skills)) |
+| [session-handoff](./plugins/session-handoff/README.md) | PreCompact hook + research/agent-prompt handoff artifacts: at compaction time, finish the request or capture the session for a fresh agent (forked from [mattpocock/skills](https://github.com/mattpocock/skills)) |
 
 ## Related external skills
 

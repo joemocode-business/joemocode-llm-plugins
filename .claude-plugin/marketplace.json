@@ -15,7 +15,7 @@
     {
       "name": "session-handoff",
       "source": "./plugins/session-handoff",
-      "description": "Compact the current conversation into a handoff document for a fresh agent to continue",
+      "description": "PreCompact hook + research/agent-prompt handoff artifacts: at compaction time, finish the request or capture the session for a fresh agent",
       "strict": true
     }
   ]

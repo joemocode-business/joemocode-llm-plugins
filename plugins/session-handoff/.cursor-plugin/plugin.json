@@ -1,9 +1,9 @@
 {
   "name": "session-handoff",
-  "version": "0.1.0",
-  "description": "Compact the current conversation into a handoff document for a fresh agent to continue",
+  "version": "0.2.0",
+  "description": "PreCompact handoff: at compaction time, finish the request or capture a research/agent-prompt artifact for a fresh agent",
   "author": { "name": "Joe MoCode" },
   "repository": "https://github.com/joemocode-business/joemocode-llm-plugins",
-  "keywords": ["handoff", "context", "compaction", "session", "continuity"],
+  "keywords": ["handoff", "context", "compaction", "precompact", "hooks", "research", "session", "continuity"],
   "skills": "./skills/"
 }

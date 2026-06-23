@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "PreCompact": [{
+      "matcher": "",
+      "hooks": [
+        { "type": "command", "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/precompact-handoff.sh\"", "timeout": 15 }
+      ]
+    }]
+  }
+}
