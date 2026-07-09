@@ -9,7 +9,8 @@ Implement a plan file using parallel composer subagents for large plans, a singl
 
 ## 1. Read the plan
 
-Read the file at the path provided. Extract:
+Read the file at the path provided (if no path is given, look in `<CWD>/docs/plans/` for the
+canonical repo plan). Extract:
 - **Phases**: `##`-level sections, numbered top-level steps, or `### Phase N` headings
 - **Tasks**: bullet/numbered items under each phase
 - **Files**: any file paths mentioned per phase

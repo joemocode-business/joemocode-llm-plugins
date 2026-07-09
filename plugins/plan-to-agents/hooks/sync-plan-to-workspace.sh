@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Mirror Plan Mode (and other agent) writes from ~/.cursor/plans/ into the workspace.
+# Mirror Plan Mode (and other agent) writes from harness-global plans dirs into docs/plans/.
 set -euo pipefail
 
 input=$(cat)
@@ -17,8 +17,9 @@ if [[ -z "$file_path" || -z "$workspace_root" ]]; then
 fi
 
 home_plans_cursor="${HOME}/.cursor/plans"
-home_plans_claude="${HOME}/.claude/plans"
-workspace_plans="${workspace_root}/.cursor/plans"
+_claude_plans_subdir=plans
+home_plans_claude="${HOME}/.claude/${_claude_plans_subdir}"
+workspace_plans="${workspace_root}/docs/plans"
 
 mkdir -p "$home_plans_cursor" "$home_plans_claude" "$workspace_plans"
 
