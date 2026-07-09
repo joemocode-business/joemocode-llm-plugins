@@ -6,9 +6,9 @@ Route approved plans and explicit delegation requests to implementer agents. Wor
 
 | Flow | Platform | Trigger | Behavior |
 |------|----------|---------|----------|
-| **Post-approval dispatch** | Claude Code | `ExitPlanMode` (plan approved) | Hooks save the plan to the repo and steer Claude to invoke `plan-dispatch` — a 3-way choice: Cursor cloud (manual), Cursor local via `agent` CLI (Claude orchestrates), or save plan only |
+| **Post-approval dispatch** | Claude Code | `ExitPlanMode` (plan approved) | Hooks save the plan to the repo and steer Claude to invoke `plan-dispatch` — save plan only, or dispatch for orchestration (then pick Claude Code, Cursor, opencode, or Pi) |
 | **Plan implementation** | Cursor | Explicit: "implement this plan" + path | `implement-plan` skill orchestrates `plan-phase-implementer` and `plan-verifier` subagents |
-| **Explicit handoff** | Both | Natural language: "hand off to agent", "delegate to composer", etc. | `agent-handoff` skill parses the task, asks local vs cloud, dispatches, and verifies |
+| **Explicit handoff** | Both | Natural language: "hand off to agent", "delegate to composer", etc. | `agent-handoff` skill parses the task, asks dispatch vs cancel, picks a doer backend, dispatches, and verifies |
 
 ```mermaid
 flowchart TB
@@ -18,9 +18,9 @@ flowchart TB
     dispatchHook[plan-dispatch.sh]
     dispatchSkill[plan-dispatch skill]
     approve --> saveHook --> dispatchHook --> dispatchSkill
-    dispatchSkill --> cloud[Cursor cloud manual]
-    dispatchSkill --> claudeOrch[Claude orchestrates agent CLI]
     dispatchSkill --> saveOnly[Save plan only]
+    dispatchSkill --> pickBackend[Pick doer backend]
+    pickBackend --> orchestrate[Orchestrate via shared pattern]
   end
 
   subgraph cursor [Cursor IDE]
@@ -32,8 +32,7 @@ flowchart TB
     explicit --> taskOrch
   end
 
-  claudeOrch -->|"agent -p --model composer-2.5"| cursor
-  cloud -->|"manual handoff"| cursor
+  orchestrate -->|"native or headless per backend"| doers[Claude / Cursor / opencode / Pi]
 ```
 
 ---
@@ -42,12 +41,12 @@ flowchart TB
 
 | Type | File | Role |
 |------|------|------|
-| **Hook** | `hooks/save-plan-to-repo.sh` | Claude: copies latest `~/.claude/plans/*.md` → `<repo>/.claude/plans/` on plan approval |
+| **Hook** | `hooks/save-plan-to-repo.sh` | Claude: copies latest harness-global plan → `<repo>/docs/plans/` on plan approval |
 | **Hook** | `hooks/plan-dispatch.sh` | Claude: injects context after approval so Claude invokes `plan-dispatch` instead of implementing directly |
-| **Hook** | `hooks/sync-plan-to-workspace.sh` | Cursor: mirrors writes under `~/.cursor/plans/` or `~/.claude/plans/` → `<repo>/.cursor/plans/` |
+| **Hook** | `hooks/sync-plan-to-workspace.sh` | Cursor: mirrors harness-global plan writes → `<repo>/docs/plans/` |
 | **Hook config** | `hooks/hooks.json` | Claude `PostToolUse` matcher for `ExitPlanMode` |
 | **Hook config** | `hooks/hooks-cursor.json` | Cursor `afterFileEdit` plan sync |
-| **Skill** | `skills/plan-dispatch/SKILL.md` | Claude-primary: 3-way post-approval dispatch |
+| **Skill** | `skills/plan-dispatch/SKILL.md` | Claude-primary: two-step post-approval dispatch |
 | **Skill** | `skills/implement-plan/SKILL.md` | Cursor-primary: phase-based Task orchestration + verification |
 | **Skill** | `skills/agent-handoff/SKILL.md` | Both: explicit delegation without plan approval |
 | **Skill** | `skills/planning/SKILL.md` | Both: guides plan writing — descriptive dated filename + frontmatter |
@@ -127,7 +126,7 @@ Restart the session so the plugin hooks load and global duplicates are gone.
 
 | Platform | Permission | Why |
 |----------|------------|-----|
-| Claude Code | `Bash(agent:*)` | `plan-dispatch` Branch C and `agent-handoff` dispatch `composer-2.5` via the Cursor `agent` CLI |
+| Claude Code | `Bash(agent:*)` | Headless Cursor dispatch via the `agent` CLI when Claude orchestrates a Cursor doer |
 | Claude Code | `Bash(cursor-agent:*)` | Alternate CLI name on some installs |
 
 Add to `~/.claude/settings.json` → `permissions.allow` (see migration section above).
@@ -140,8 +139,8 @@ On Cursor, the `Task` tool is built-in; no extra CLI permissions are needed for 
 
 | Host | Global plans dir | Repo mirror | Mechanism |
 |------|------------------|-------------|-----------|
-| Claude Code | `~/.claude/plans/` | `<repo>/.claude/plans/` | `save-plan-to-repo.sh` on `ExitPlanMode` approval |
-| Cursor | `~/.cursor/plans/` | `<repo>/.cursor/plans/` | `sync-plan-to-workspace.sh` on `afterFileEdit` |
+| Claude Code | Claude harness global plans dir | `<repo>/docs/plans/` | `save-plan-to-repo.sh` on `ExitPlanMode` approval |
+| Cursor | `~/.cursor/plans/` | `<repo>/docs/plans/` | `sync-plan-to-workspace.sh` on `afterFileEdit` |
 
 Recommend git-tracking repo plan directories so approved plans travel with the codebase.
 
@@ -167,11 +166,10 @@ Guides plan writing in Plan Mode or when drafting/refining a plan. Invoked for r
 
 ### `plan-dispatch` (Claude)
 
-Triggered automatically after plan approval (via hook context injection). Presents three options:
+Triggered automatically after plan approval (via hook context injection). Two-step choice:
 
-1. **Cursor cloud (manual)** — hand off to https://cursor.com/agents
-2. **Cursor local — Claude orchestrates** — Claude splits the plan and dispatches `agent -p --model composer-2.5`
-3. **Save plan only** — keep the saved plan, no implementation
+1. **Save plan only** — keep the saved plan, no implementation
+2. **Dispatch to agent for orchestration** — then pick **Claude Code**, **Cursor**, **opencode**, or **Pi** as the doer backend (native in-session when the backend matches the current harness; headless shell-out otherwise — see `shared/dispatch-adapters.md`)
 
 **Opt out of dispatch prompt** (save hook still runs):
 
@@ -198,12 +196,7 @@ Natural-language triggers enabled (`disable-model-invocation: false`). Use for a
 - "delegate to composer"
 - "run this in a subagent"
 
-Parses task goal, files, and acceptance criteria; asks local subagent vs Cursor cloud vs cancel; dispatches and verifies via `git diff`.
-
-| Platform | Local dispatch |
-|----------|----------------|
-| Claude Code | `agent -p --force --trust --model composer-2.5 --workspace "<CWD>" "<prompt>"` |
-| Cursor | `Task` tool with `generalPurpose` or `plan-phase-implementer` |
+Parses task goal, files, and acceptance criteria; asks dispatch vs cancel; picks a doer backend; dispatches and verifies via `git diff` (see `shared/orchestration-pattern.md` and `shared/dispatch-adapters.md`).
 
 ---
 
@@ -246,21 +239,21 @@ No conflicts between the two plugins — install both independently.
 
 - [ ] `/plugin marketplace add` + `/plugin install plan-to-agents@joemocode-llm-plugins`
 - [ ] Remove global hooks from `~/.claude/settings.json` and `~/.claude/skills/plan-dispatch/`; restart Claude Code
-- [ ] Enter Plan Mode → approve plan → confirm plan copied to `<repo>/.claude/plans/`
-- [ ] Confirm `plan-dispatch` skill invoked (3-way question)
-- [ ] Branch C: confirm `agent` CLI dispatch works with `Bash(agent:*)` permission
+- [ ] Enter Plan Mode → approve plan → confirm plan copied to `<repo>/docs/plans/`
+- [ ] Confirm `plan-dispatch` skill invoked (two-step question)
+- [ ] Dispatch path: confirm headless dispatch works when orchestrator and doer backend differ
 - [ ] `CLAUDE_NO_COMPOSER_DELEGATE=1` → normal Claude implementation (save hook still runs)
 
 ### Cursor
 
 - [ ] Install same marketplace plugin in Cursor
-- [ ] Plan Mode: edit plan → confirm sync to `<repo>/.cursor/plans/`
+- [ ] Plan Mode: edit plan → confirm sync to `<repo>/docs/plans/`
 - [ ] Explicit: "implement this plan" with path → `implement-plan` spawns subagents
 - [ ] Explicit: "hand off this refactor to a subagent" → `agent-handoff` works
 
 ### Cross-platform
 
-- [ ] Plan approved in Claude, choose Cursor local → composer implements
+- [ ] Plan approved in Claude, dispatch to Cursor → subagents implement
 - [ ] Plan created in Cursor, implement via `implement-plan` without Claude involved
 
 ---
@@ -277,7 +270,6 @@ No conflicts between the two plugins — install both independently.
 ## Out of scope (v1)
 
 - Cursor auto-prompt on plan approval (no proven `ExitPlanMode` equivalent)
-- Cursor cloud agent CLI automation (manual handoff at https://cursor.com/agents)
 - Cursor SDK (`@cursor/sdk`) for programmatic cloud agent launch
 
 Project-level agent overrides in `<repo>/.cursor/agents/` take priority over the plugin's bundled agents.
