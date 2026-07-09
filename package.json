@@ -1,0 +1,7 @@
+{
+  "name": "joemocode-llm-plugins",
+  "keywords": ["pi-package"],
+  "pi": {
+    "skills": ["./plugins/*/skills/*"]
+  }
+}
