@@ -1,0 +1,15 @@
+name: Emit check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  emit-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Regenerate agent files from shared roles
+        run: bash plugins/plan-to-agents/shared/emit.sh
+      - name: Fail if generated files are stale
+        run: git diff --exit-code

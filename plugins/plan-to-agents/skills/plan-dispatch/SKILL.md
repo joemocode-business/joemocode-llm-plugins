@@ -89,62 +89,19 @@ Guardrails:
 You are the ORCHESTRATOR. Do not implement the approved plan yourself — dispatch it to Cursor's
 `composer-2.5` agent and verify the results.
 
-Capture the current feature branch once:
+Follow the backend-neutral orchestration pattern in
+[orchestration-pattern.md](../../shared/orchestration-pattern.md) (split plan → branch/worktree per
+subtask off `$base` → dispatch → verify → merge → run plan Verification → report).
 
-    base=$(git rev-parse --abbrev-ref HEAD)
-
-All subagent work branches off `$base` (the existing feature branch — not a detached HEAD), so
-reviewers can compare, cherry-pick, or drop individual subagent branches before merging.
-
-### C1. Split the plan into subtasks
-
-Read the approved plan and break it into discrete subtasks. For each, note its target files and
-acceptance criteria, and mark whether it is INDEPENDENT (no ordering/file overlap with others) or
-DEPENDENT (must follow an earlier subtask). Derive a short **subtask slug** (kebab-case) for each.
-
-### C2. Dispatch
-
-**Default: one branch + worktree per subtask** (isolated diffs for per-branch review). Dispatch
-each subtask into its own worktree on a new branch off `$base`:
+Dispatch using the **Claude Code** in-session column in
+[dispatch-adapters.md](../../shared/dispatch-adapters.md) — shell out via the Cursor `agent` CLI
+with `composer-2.5`, one worktree per subtask off `$base`:
 
     agent -p --force --trust --model composer-2.5 --worktree "<subtask-slug>" --worktree-base "$base" "<focused subtask prompt> — commit your changes on this branch when done"
 
 - `-p` non-interactive · `--force` allow edits/shell · `--trust` skip workspace-trust prompt.
-- The prompt should contain the subtask goal + exact files + acceptance criteria from the plan.
-- **Instruct each subagent to commit** its work on its worktree branch when finished (do not leave
-  uncommitted changes).
 - `agent` prints the worktree path under `~/.cursor/worktrees/<repo>/<subtask-slug>`; track slug,
   branch name, and worktree path for every run.
-
-**Parallelize independent subtasks.** Launch multiple `agent` runs concurrently (background Bash,
-or one message with several backgrounded calls) and wait for all to finish. Run DEPENDENT subtasks
-sequentially after their prerequisites are verified and merged (or after the user confirms the
-prerequisite branch is acceptable).
-
-### C3. Verify each subtask
-
-After a run finishes, read its output and review that subtask's **branch diff** (not the main
-working tree):
-
-    git -C <worktree> diff "$base"...HEAD
-
-(or `git log` / `git diff <branch>` on the subagent branch). Confirm the diff satisfies the
-subtask's acceptance criteria. If wrong/incomplete, re-dispatch a corrective prompt in the same
-worktree (use `--continue`/`--resume <id>` to keep that Composer session's context). Only mark a
-subtask done once verified.
-
-### C4. Finish
-
-Merge verified subagent branches back into the feature branch (`$base`) — sequentially for
-DEPENDENT subtasks, or in the order the user chooses during review. After merges, run the plan's
-verification section (build/tests).
-
-Report a summary that includes:
-
-- Each subtask slug, branch name, worktree path, and what that Composer run did.
-- The **branch list** so the user can review or merge selectively (cherry-pick / drop branches)
-  instead of one squashed diff.
-- Per-branch diffs (`git diff "$base"...<branch>`) and the cumulative diff on `$base` after merges.
 
 Continuity (optional): `chat_id=$(agent create-chat)` once, then `agent -p --resume "$chat_id" ...`
 to keep Composer context across sequential subtasks (still use a dedicated worktree per subtask).

@@ -44,6 +44,10 @@ Then branch on the answer.
 
 ## 3. Local branch — platform-specific
 
+Follow [orchestration-pattern.md](../../shared/orchestration-pattern.md) for split → dispatch →
+verify → report. Use [dispatch-adapters.md](../../shared/dispatch-adapters.md) for per-backend
+dispatch commands.
+
 ### Claude Code (orchestrator is Claude)
 
 You are the ORCHESTRATOR. Do not implement the task yourself — dispatch it and verify.
