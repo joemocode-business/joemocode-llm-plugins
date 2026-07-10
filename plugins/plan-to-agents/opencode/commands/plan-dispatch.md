@@ -31,9 +31,9 @@ If dispatching, ask the user to choose: **Claude Code**, **Cursor**, **opencode*
 
 You are the ORCHESTRATOR. Do not implement the plan yourself.
 
-Follow `plugins/plan-to-agents/shared/orchestration-pattern.md` (split → branch/worktree per subtask off `base=$(git rev-parse --abbrev-ref HEAD)` → dispatch → verify branch diff → merge → run plan Verification → report).
+Follow `plan-to-agents-shared/orchestration-pattern.md` in the same opencode scope as this command (`.opencode/plan-to-agents-shared/` for project install, `~/.config/opencode/plan-to-agents-shared/` for `--global` install — created by `install-opencode.sh`).
 
-Use `plugins/plan-to-agents/shared/dispatch-adapters.md`:
+Use `plan-to-agents-shared/dispatch-adapters.md` from the same scope:
 
 | When | How |
 |------|-----|

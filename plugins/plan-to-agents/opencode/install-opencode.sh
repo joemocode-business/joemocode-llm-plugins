@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Symlink plan-to-agents opencode agents/commands into ONE discovery scope (project or global).
+# Symlink plan-to-agents opencode agents/commands/shared into ONE discovery scope (project or global).
 #
 # Optional alternative (do not combine with symlinks — double-loads definitions):
 # Merge into opencode.json instead of symlinking:
@@ -34,16 +34,18 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_AGENTS="$SCRIPT_DIR/agents"
 SOURCE_COMMANDS="$SCRIPT_DIR/commands"
+SOURCE_SHARED="$SCRIPT_DIR/../shared"
 GLOBAL=false
 
 usage() {
   cat <<'EOF'
 Usage: install-opencode.sh [--global]
 
-Install plan-to-agents opencode agents and commands via symlinks into exactly one scope:
+Install plan-to-agents opencode agents, commands, and shared orchestration docs via
+symlinks into exactly one scope:
 
-  (default)  ./.opencode/{agents,commands}/     project-local discovery
-  --global   ~/.config/opencode/{agents,commands}/   global discovery
+  (default)  ./.opencode/{agents,commands,plan-to-agents-shared}/     project-local
+  --global   ~/.config/opencode/{agents,commands,plan-to-agents-shared}/   global
 
 Run from the repository root for project install. Do not install both scopes — opencode would load duplicates.
 EOF
@@ -68,12 +70,14 @@ done
 if [ "$GLOBAL" = true ]; then
   TARGET_AGENTS="${HOME}/.config/opencode/agents"
   TARGET_COMMANDS="${HOME}/.config/opencode/commands"
+  TARGET_SHARED="${HOME}/.config/opencode/plan-to-agents-shared"
 else
   TARGET_AGENTS=".opencode/agents"
   TARGET_COMMANDS=".opencode/commands"
+  TARGET_SHARED=".opencode/plan-to-agents-shared"
 fi
 
-mkdir -p "$TARGET_AGENTS" "$TARGET_COMMANDS"
+mkdir -p "$TARGET_AGENTS" "$TARGET_COMMANDS" "$TARGET_SHARED"
 
 link_markdown() {
   local src_dir=$1 dest_dir=$2 file
@@ -82,8 +86,17 @@ link_markdown() {
   done
 }
 
+link_shared() {
+  local file
+  for file in orchestration-pattern.md dispatch-adapters.md; do
+    ln -sf "$SOURCE_SHARED/$file" "$TARGET_SHARED/$file"
+  done
+}
+
 link_markdown "$SOURCE_AGENTS" "$TARGET_AGENTS"
 link_markdown "$SOURCE_COMMANDS" "$TARGET_COMMANDS"
+link_shared
 
 echo "Linked agents  → $TARGET_AGENTS"
 echo "Linked commands → $TARGET_COMMANDS"
+echo "Linked shared  → $TARGET_SHARED"

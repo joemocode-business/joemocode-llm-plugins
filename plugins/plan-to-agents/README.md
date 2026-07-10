@@ -86,7 +86,7 @@ Global scope (`~/.config/opencode/`):
 bash plugins/plan-to-agents/opencode/install-opencode.sh --global
 ```
 
-Use **exactly one** scope (project or global, not both). opencode's `"plugin": [...]` npm array loads JS/TS hooks only — it cannot ship markdown agents or slash commands, so this repo uses symlinks (or optional inline `opencode.json` `{file:...}` fragments — never both for the same definitions). See [docs/pidev-setup.md](../../docs/pidev-setup.md#plan-to-agents--opencode).
+Use **exactly one** scope (project or global, not both). The installer symlinks agents, commands, and `plan-to-agents-shared/` (orchestration + dispatch docs) into that scope. opencode's `"plugin": [...]` npm array loads JS/TS hooks only — it cannot ship markdown agents or slash commands, so this repo uses symlinks (or optional inline `opencode.json` `{file:...}` fragments — never both for the same definitions). See [docs/pidev-setup.md](../../docs/pidev-setup.md#plan-to-agents--opencode).
 
 Commands after install: `/plan`, `/plan-dispatch`, `/implement-plan`, `/agent-handoff`.
 
@@ -174,6 +174,19 @@ If you previously installed plan-dispatch hooks globally, remove duplicates afte
 4. Restart Claude Code.
 
 ---
+
+## Planning harness suitability (with Plannotator)
+
+[Plannotator](https://github.com/backnotprop/plannotator) provides interactive plan review before approval. Per [Plannotator's installation docs](https://plannotator.ai/docs/getting-started/installation/), native Plan Mode hooks ship for **Claude Code** and **opencode** — these are the best harnesses for drafting and reviewing plans with Plannotator before dispatch.
+
+| Harness | Plan Mode + Plannotator hooks | Notes |
+|---------|------------------------------|-------|
+| **Claude Code** | Yes | `/plugin install plannotator@plannotator` |
+| **opencode** | Yes | `"plugin": ["@plannotator/opencode@latest"]` in `opencode.json` |
+| **Cursor** | Partial | Plannotator skills only; no Plan Mode hook plugin yet |
+| **Pi** | Partial | Plannotator lists Pi support; use explicit `/plan` or `planning` skill for `docs/plans/` |
+
+Any harness can **implement** an approved plan from `docs/plans/` via plan-to-agents dispatch; the table above is about where to **write and review** plans interactively.
 
 ## Plannotator (recommended)
 

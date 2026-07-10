@@ -11,7 +11,7 @@ Do not implement missing features — report them as failures.
 
 ## Process
 
-1. Run `git diff main...HEAD` to see all changes relative to the `main` branch (not `origin/main`)
+1. Run `git diff <base>...HEAD` where `<base>` is the feature branch named in your prompt (the branch phase implementers worked against). If no base branch was provided, fall back to `main`. Use the local branch name, not `origin/<branch>`.
 2. Re-read the acceptance criteria provided in your prompt
 3. For each criterion: identify concrete evidence in the diff that it is met (or not)
 4. If a criterion requires runtime behaviour that can't be verified from the diff alone, mark it `NEEDS-MANUAL` with a brief description of what to check

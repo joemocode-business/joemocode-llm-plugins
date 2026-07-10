@@ -23,7 +23,7 @@ If dispatching, ask: **Claude Code**, **Cursor**, **opencode**, or **Pi**.
 
 You are the ORCHESTRATOR. Do not implement yourself.
 
-Follow `plugins/plan-to-agents/shared/orchestration-pattern.md` and `plugins/plan-to-agents/shared/dispatch-adapters.md`:
+Follow `plan-to-agents-shared/orchestration-pattern.md` and `plan-to-agents-shared/dispatch-adapters.md` in your opencode scope (`.opencode/plan-to-agents-shared/` or `~/.config/opencode/plan-to-agents-shared/`):
 
 | When | How |
 |------|-----|
