@@ -1,6 +1,6 @@
 ---
 name: implement-plan
-description: Implement a plan file by orchestrating parallel subagents per phase, then verifying acceptance criteria. Use when the user says "implement this plan", "execute this plan", or provides a .md plan file path to implement.
+description: Implement a plan file by orchestrating parallel subagents per phase, then verifying acceptance criteria. Use when the user provides a plan file path (e.g. docs/plans/YYYY-MM-DD-name.md) or names a specific plan to implement. Requires an explicit plan path — do not run without one.
 disable-model-invocation: true
 ---
 # Implement Plan
@@ -9,7 +9,9 @@ Implement a plan file using parallel composer subagents for large plans, a singl
 
 ## 1. Read the plan
 
-Read the file at the path provided. If no path is given, use the **most recently modified** file in `<CWD>/docs/plans/` (same rule as opencode `/implement-plan`). Extract:
+**Requires an explicit plan path.** This skill is on-demand — do not guess or pick a default from `docs/plans/`.
+
+Read the file at the path provided in the user's request or slash-command argument (e.g. `docs/plans/YYYY-MM-DD-name.md`). If no path was given, stop and ask the user which plan to implement; you may list `docs/plans/*.md` to help them choose. Extract:
 - **Phases**: `##`-level sections, numbered top-level steps, or `### Phase N` headings
 - **Tasks**: bullet/numbered items under each phase
 - **Files**: any file paths mentioned per phase

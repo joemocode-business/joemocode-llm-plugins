@@ -141,9 +141,9 @@ After plan approval (Claude via hook; Pi via explicit skill invocation). Two-ste
 export CLAUDE_NO_COMPOSER_DELEGATE=1
 ```
 
-### `implement-plan` (Cursor, explicit)
+### `implement-plan` (Cursor, opencode — explicit)
 
-Slash or explicit invocation only. Orchestrates phase extraction, parallel `plan-phase-implementer` Tasks, `plan-verifier`, and a fix loop.
+Slash or explicit invocation only; **requires a plan file path** (e.g. `/implement-plan docs/plans/2026-07-09-foo.md`). Orchestrates phase extraction, parallel `plan-phase-implementer` Tasks, merge, `plan-verifier`, and a fix loop.
 
 ### `agent-handoff` (Claude, Cursor, Pi)
 
@@ -218,7 +218,7 @@ No conflicts — install both independently. See the [marketplace README](../../
 ### opencode
 
 - [ ] `install-opencode.sh` (one scope); `/plan`, `/plan-dispatch`, `/implement-plan` listed once
-- [ ] `/implement-plan` on a small plan → subagents + verifier
+- [ ] `/implement-plan docs/plans/<plan>.md` on a small plan → subagents + verifier
 
 ### Pi
 

@@ -4,7 +4,7 @@ description: Implement a plan file via plan-phase-implementer and plan-verifier 
 
 Implement the plan at: $ARGUMENTS
 
-If no path was given, use the most recent file in `docs/plans/`.
+**Requires a plan path.** If `$ARGUMENTS` is empty, stop and ask the user which file under `docs/plans/` to implement (list available plans if helpful). Do not pick a default.
 
 You are the ORCHESTRATOR. Do not implement phases yourself — use the native **Task** tool to spawn subagents.
 
