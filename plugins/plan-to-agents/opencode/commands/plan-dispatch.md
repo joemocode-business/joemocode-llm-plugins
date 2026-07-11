@@ -25,7 +25,7 @@ Ask the user to choose:
 
 ## 2. Pick doer backend (dispatch only)
 
-If dispatching, ask the user to choose: **Claude Code**, **Cursor**, **opencode**, or **Pi**.
+If dispatching, ask the user to choose a doer backend. When the plugin config's `enabled_harnesses` is set, offer **only** those harnesses; otherwise offer all four: **Claude Code**, **Cursor**, **opencode**, or **Pi**.
 
 ## 3. Orchestrate (dispatch only)
 
@@ -38,6 +38,6 @@ Use `plan-to-agents-shared/dispatch-adapters.md` from the same scope:
 | When | How |
 |------|-----|
 | Chosen backend **is opencode** (this session) | Native **Task** tool — spawn `plan-phase-implementer` and `plan-verifier` subagents |
-| Chosen backend **is not opencode** | Headless shell-out per the adapters table (e.g. `claude -p`, `agent -p --model composer-2.5`, `opencode run -m <model> "<prompt>"`, `pi --mode rpc`) |
+| Chosen backend **is not opencode** | Headless shell-out per the adapters table (e.g. `claude -p`, `agent -p --model composer-2.5`, `opencode run -m <model> "<prompt>"`, `pi --mode rpc`). Resolve `<model>` per `../../shared/model-resolution.md` (configured default → choose from list → ask the user). Save defaults via `/plan-to-agents:configure`. |
 
 Include subtask goal, exact files, and acceptance criteria in every dispatch prompt. Instruct each subagent to commit on its worktree branch.

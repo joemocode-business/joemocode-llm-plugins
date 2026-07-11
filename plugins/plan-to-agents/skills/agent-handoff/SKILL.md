@@ -25,7 +25,7 @@ Extract from the user's request and recent context:
 | **Task goal** | One-sentence objective |
 | **Target files** | Paths to read or modify |
 | **Acceptance criteria** | How to know the task is done |
-| **Model preference** | e.g. `composer-2.5` (default for Cursor headless dispatch) |
+| **Model preference** | Per [model-resolution.md](../../shared/model-resolution.md) for the chosen backend (configured default → ask the user); save defaults via `/plan-to-agents:configure` |
 | **Parallel vs sequential** | Independent subtasks that can run concurrently, or ordered dependencies |
 
 If anything is ambiguous, ask a short clarifying question before proceeding.
@@ -41,8 +41,9 @@ Then branch on the answer.
 
 ## 3. Pick doer backend (step 2, dispatch only)
 
-If the user chose **Dispatch to agent for orchestration**, call `AskUserQuestion` with exactly
-these four options:
+If the user chose **Dispatch to agent for orchestration**, call `AskUserQuestion` with the
+doer-backend options. When the plugin config's `enabled_harnesses` is set, present **only** those
+harnesses; otherwise present all four:
 
 - **Claude Code**
 - **Cursor**

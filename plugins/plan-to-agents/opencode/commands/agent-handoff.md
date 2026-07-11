@@ -4,7 +4,7 @@ description: Explicit delegation — hand off a task to a doer backend without p
 
 Hand off this task: $ARGUMENTS
 
-Parse from the request and recent context: task goal, target files, acceptance criteria, and whether subtasks can run in parallel.
+Parse from the request and recent context: task goal, target files, acceptance criteria, and whether subtasks can run in parallel. Resolve model per `../../shared/model-resolution.md` for the chosen backend (configured default → ask the user); save defaults via `/plan-to-agents:configure`.
 
 Do **not** use this flow when a plan was just approved — use `/plan-dispatch` instead.
 
@@ -17,7 +17,7 @@ Ask the user:
 
 ## 2. Pick doer backend (dispatch only)
 
-If dispatching, ask: **Claude Code**, **Cursor**, **opencode**, or **Pi**.
+If dispatching, ask for a doer backend. When the plugin config's `enabled_harnesses` is set, offer **only** those harnesses; otherwise offer all four: **Claude Code**, **Cursor**, **opencode**, or **Pi**.
 
 ## 3. Orchestrate
 
