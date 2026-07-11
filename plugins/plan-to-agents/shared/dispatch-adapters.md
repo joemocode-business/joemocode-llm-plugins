@@ -1,6 +1,6 @@
 # Dispatch adapters
 
-How to dispatch work **to each supported backend** from any orchestrator harness. After the user picks a doer backend in step 2 of dispatch, use that backend's row — regardless of which harness is running the orchestrator.
+How to dispatch work **to each supported backend** from any orchestrator harness. The `<model>` used in headless commands below is resolved via [model-resolution.md](./model-resolution.md), so that placeholder has a single, unambiguous source. After the user picks a doer backend in step 2 of dispatch, use that backend's row — regardless of which harness is running the orchestrator.
 
 | Target backend | In-session (orchestrator runs in this harness) | Headless (orchestrator runs in a different harness) |
 |----------------|------------------------------------------------|------------------------------------------------------|
