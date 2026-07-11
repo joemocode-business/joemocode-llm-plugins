@@ -1,6 +1,6 @@
 ---
 name: implement-plan
-description: Implement a plan file by orchestrating parallel subagents per phase, then verifying acceptance criteria. Use when the user says "implement this plan", "execute this plan", or provides a .md plan file path to implement.
+description: Implement a plan file by orchestrating parallel subagents per phase, then verifying acceptance criteria. Use when the user provides a plan file path (e.g. docs/plans/YYYY-MM-DD-name.md) or names a specific plan to implement. Requires an explicit plan path — do not run without one.
 disable-model-invocation: true
 ---
 # Implement Plan
@@ -9,7 +9,9 @@ Implement a plan file using parallel composer subagents for large plans, a singl
 
 ## 1. Read the plan
 
-Read the file at the path provided. Extract:
+**Requires an explicit plan path.** This skill is on-demand — do not guess or pick a default from `docs/plans/`.
+
+Read the file at the path provided in the user's request or slash-command argument (e.g. `docs/plans/YYYY-MM-DD-name.md`). If no path was given, stop and ask the user which plan to implement; you may list `docs/plans/*.md` to help them choose. Extract:
 - **Phases**: `##`-level sections, numbered top-level steps, or `### Phase N` headings
 - **Tasks**: bullet/numbered items under each phase
 - **Files**: any file paths mentioned per phase
@@ -33,7 +35,9 @@ If no acceptance criteria section exists, derive criteria from the plan's "after
 
 ## 4. Spawn implementers
 
-For parallelizable phase groups, each `Task` subagent should work in its own branch/worktree off the current feature branch and commit there — mirroring plan-dispatch Branch C — so per-phase diffs are reviewable as separate branches before merging back.
+Capture the feature branch once: `base=$(git rev-parse --abbrev-ref HEAD)`.
+
+For parallelizable phase groups, each `Task` subagent should work in its own branch/worktree off `$base` and commit there — following [orchestration-pattern.md](../../shared/orchestration-pattern.md) — so per-phase diffs are reviewable as separate branches before merging back.
 
 For each independent group, fire a `Task` tool call using the `plan-phase-implementer` subagent.
 Fire all independent groups **in the same response** (parallel).
@@ -65,11 +69,17 @@ Review each implementer's report. If any phase is `blocked`:
 
 Compile a change manifest: list of files changed across all groups.
 
-## 6. Spawn verifier
+## 6. Merge implementer branches
+
+Merge verified implementer branches back into `$base` (sequentially when phases depended on each other). The goal is **separate commits per phase** for granular review, then **one cumulative tree on `$base`** for plan-level verification.
+
+## 7. Spawn verifier
 
 Fire one `plan-verifier` Task with:
 
 ```
+**Base branch:** $base
+
 **Acceptance criteria from the plan:**
 [paste extracted criteria]
 
@@ -77,7 +87,7 @@ Fire one `plan-verifier` Task with:
 [paste change manifest]
 ```
 
-## 7. Fix verifier failures (if any)
+## 8. Fix verifier failures (if any)
 
 If the verifier reports any `FAIL` criteria or code-review annotations requiring changes:
 
@@ -85,10 +95,10 @@ If the verifier reports any `FAIL` criteria or code-review annotations requiring
 2. Spawn a new `plan-phase-implementer` Task for each failing group, passing:
    - The specific failing criteria as the "Acceptance criteria to fix"
    - The verifier's evidence / code-review annotations as context
-3. Wait for the fix implementer(s) to complete, then re-run the verifier (step 6) once more
+3. Wait for the fix implementer(s) to complete, then re-run the verifier (step 7) once more
 4. Repeat until the verifier passes or a criterion is explicitly marked `NEEDS-MANUAL`
 
-## 8. Report to user and update PR
+## 9. Report to user and update PR
 
 Summarize:
 - Which phases ran and how (parallel groups or single)

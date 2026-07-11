@@ -1,17 +1,17 @@
 ---
 name: plan-dispatch
-description: After a plan is approved (via the plan-to-agents plugin), ask how to proceed with implementation — hand off to a Cursor cloud/background agent (manual), delegate to a local Cursor composer-2.5 agent with Claude orchestrating, or just keep the saved plan (no implementation). The approved plan has already been auto-copied into the repo's .claude/plans/.
+description: After a plan is approved (via the plan-to-agents plugin), ask how to proceed — save the plan only, or dispatch to an agent for orchestration (then pick Claude Code, Cursor, opencode, or Pi as the doer backend). The approved plan has already been auto-copied into the repo's docs/plans/.
 ---
 
 # Plan dispatch
 
 A plan was just approved. The approval hook has already auto-saved the plan into the repo at
-`<CWD>/.claude/plans/`. Do NOT start implementing yet — first conform the saved plan to the
+`<CWD>/docs/plans/`. Do NOT start implementing yet — first conform the saved plan to the
 template, then ask the user how to proceed.
 
 ## 0. Conform the saved plan to the template
 
-The approval hook copies the plan into `<CWD>/.claude/plans/` (often with a harness random slug).
+The approval hook copies the plan into `<CWD>/docs/plans/` (often with a harness random slug).
 Before anything else, bring that file in line with the **planning** skill and
 `skills/planning/plan-template.md` (source of truth for structure and frontmatter):
 
@@ -23,17 +23,28 @@ Before anything else, bring that file in line with the **planning** skill and
 3. **Body** — align sections with the template (`Context`, `Approach`, `Verification`) if they are
    missing or out of order; do not rewrite substantive content.
 
-Use the conformed path (`<CWD>/.claude/plans/YYYY-MM-DD-<descriptive-kebab-name>.md`) in all
+Use the conformed path (`<CWD>/docs/plans/YYYY-MM-DD-<descriptive-kebab-name>.md`) in all
 branches below.
 
-## 1. Ask how to proceed
+## 1. Ask how to proceed (step 1)
 
-Call `AskUserQuestion` with exactly these three options:
+Call `AskUserQuestion` with exactly these two options:
 
-- **Cursor cloud (manual)** — hand off to a Cursor Background/Cloud Agent.
-- **Cursor local — Claude orchestrates** — delegate to a local `composer-2.5` agent; Claude splits,
-  dispatches, and verifies.
 - **Save plan only** — keep the saved plan, do nothing else.
+- **Dispatch to agent for orchestration** — split the plan into subtasks and dispatch to a doer
+  backend.
+
+Then branch on the answer.
+
+## 2. Pick doer backend (step 2, dispatch only)
+
+If the user chose **Dispatch to agent for orchestration**, call `AskUserQuestion` with exactly
+these four options:
+
+- **Claude Code**
+- **Cursor**
+- **opencode**
+- **Pi**
 
 Then branch on the answer.
 
@@ -41,113 +52,31 @@ Then branch on the answer.
 
 ## Branch A — Save plan only
 
-The plan is already saved at `<CWD>/.claude/plans/YYYY-MM-DD-<descriptive-kebab-name>.md` (copied
+The plan is already saved at `<CWD>/docs/plans/YYYY-MM-DD-<descriptive-kebab-name>.md` (copied
 by the approval hook and conformed in step 0). Confirm the path to the user and stop. Do **not**
 implement anything.
 
 ---
 
-## Branch B — Cursor cloud (publish + hand off)
+## Branch B — Dispatch to agent for orchestration
 
-A cloud agent clones from `origin`, so the plan must be pushed to a branch first. Publish it to a
-dedicated `plan/<slug>` branch so the cloud agent's work stacks on the plan commit and the PR comes
-from `plan/<slug>` — `develop` and any feature branch stay untouched.
+You are the ORCHESTRATOR. Do not implement the approved plan yourself — dispatch it to subagents on
+the chosen backend and verify the results.
 
-`<slug>` = the conformed plan filename without extension (e.g. `2026-06-17-reduce-handoff-friction`).
+Follow the backend-neutral orchestration pattern in
+[orchestration-pattern.md](../../shared/orchestration-pattern.md) (split plan → branch/worktree per
+subtask off `$base` → dispatch → verify → merge → run plan Verification → report).
 
-### B1. Publish the plan to a dedicated branch
+Use [dispatch-adapters.md](../../shared/dispatch-adapters.md) for per-backend dispatch:
 
-Branch `plan/<slug>` off the current branch, commit **only the plan file**, and push:
+- When the **chosen doer backend matches the current harness**, orchestrate **in-session** using
+  that row's in-session column (native subagents, `Task` tool, etc.).
+- When the **chosen backend differs from the current harness**, **shell out** using that row's
+  headless column (`claude -p`, `agent -p --model composer-2.5`, `opencode run`, `pi --mode rpc`,
+  etc.).
 
-    base=$(git rev-parse --abbrev-ref HEAD)
-    branch="plan/<slug>"
-    plan_file=".claude/plans/<conformed-filename>.md"
-
-    git checkout -b "$branch" "$base"
-    git add "$plan_file"
-    git commit -m "Add plan: <slug>"
-    git push -u origin "$branch"
-
-Guardrails:
-
-- **No `origin` remote**: stop — a cloud agent needs a pushed branch. Offer "Save plan only" or
-  Branch C (local) instead.
-- **Branch already exists** (locally or on origin): append a suffix (`plan/<slug>-2`).
-- **Other uncommitted changes**: stage only the plan file, never the user's unrelated work.
-
-### B2. Hand off
-
-1. Tell the user the pushed branch `plan/<slug>`.
-2. Have them start a Cursor Background/Cloud Agent (https://cursor.com/agents) against **this repo on
-   `plan/<slug>`**, pointed at `<CWD>/.claude/plans/<conformed-filename>.md`.
-3. Stop. Make no further edits and no API calls.
-
----
-
-## Branch C — Cursor local, Claude orchestrates
-
-You are the ORCHESTRATOR. Do not implement the approved plan yourself — dispatch it to Cursor's
-`composer-2.5` agent and verify the results.
-
-Capture the current feature branch once:
-
-    base=$(git rev-parse --abbrev-ref HEAD)
-
-All subagent work branches off `$base` (the existing feature branch — not a detached HEAD), so
-reviewers can compare, cherry-pick, or drop individual subagent branches before merging.
-
-### C1. Split the plan into subtasks
-
-Read the approved plan and break it into discrete subtasks. For each, note its target files and
-acceptance criteria, and mark whether it is INDEPENDENT (no ordering/file overlap with others) or
-DEPENDENT (must follow an earlier subtask). Derive a short **subtask slug** (kebab-case) for each.
-
-### C2. Dispatch
-
-**Default: one branch + worktree per subtask** (isolated diffs for per-branch review). Dispatch
-each subtask into its own worktree on a new branch off `$base`:
-
-    agent -p --force --trust --model composer-2.5 --worktree "<subtask-slug>" --worktree-base "$base" "<focused subtask prompt> — commit your changes on this branch when done"
-
-- `-p` non-interactive · `--force` allow edits/shell · `--trust` skip workspace-trust prompt.
-- The prompt should contain the subtask goal + exact files + acceptance criteria from the plan.
-- **Instruct each subagent to commit** its work on its worktree branch when finished (do not leave
-  uncommitted changes).
-- `agent` prints the worktree path under `~/.cursor/worktrees/<repo>/<subtask-slug>`; track slug,
-  branch name, and worktree path for every run.
-
-**Parallelize independent subtasks.** Launch multiple `agent` runs concurrently (background Bash,
-or one message with several backgrounded calls) and wait for all to finish. Run DEPENDENT subtasks
-sequentially after their prerequisites are verified and merged (or after the user confirms the
-prerequisite branch is acceptable).
-
-### C3. Verify each subtask
-
-After a run finishes, read its output and review that subtask's **branch diff** (not the main
-working tree):
-
-    git -C <worktree> diff "$base"...HEAD
-
-(or `git log` / `git diff <branch>` on the subagent branch). Confirm the diff satisfies the
-subtask's acceptance criteria. If wrong/incomplete, re-dispatch a corrective prompt in the same
-worktree (use `--continue`/`--resume <id>` to keep that Composer session's context). Only mark a
-subtask done once verified.
-
-### C4. Finish
-
-Merge verified subagent branches back into the feature branch (`$base`) — sequentially for
-DEPENDENT subtasks, or in the order the user chooses during review. After merges, run the plan's
-verification section (build/tests).
-
-Report a summary that includes:
-
-- Each subtask slug, branch name, worktree path, and what that Composer run did.
-- The **branch list** so the user can review or merge selectively (cherry-pick / drop branches)
-  instead of one squashed diff.
-- Per-branch diffs (`git diff "$base"...<branch>`) and the cumulative diff on `$base` after merges.
-
-Continuity (optional): `chat_id=$(agent create-chat)` once, then `agent -p --resume "$chat_id" ...`
-to keep Composer context across sequential subtasks (still use a dedicated worktree per subtask).
+Capture `base=$(git rev-parse --abbrev-ref HEAD)` once per
+[orchestration-pattern.md](../../shared/orchestration-pattern.md).
 
 ---
 
