@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "enabled_harnesses": ["opencode", "claude-code"],
+  "harnesses": {
+    "claude-code": { "default_model": "claude-opus-4-8", "models": [] },
+    "cursor":      { "default_model": "composer-2.5",   "models": [] },
+    "opencode": {
+      "default_model": "vllm/Qwen/Qwen3-Coder-30B-A3B-Instruct",
+      "models": ["vllm/Qwen/Qwen3-Coder-30B-A3B-Instruct", "anthropic/claude-sonnet-5"]
+    },
+    "pi": { "default_model": null, "models": [] }
+  }
+}
