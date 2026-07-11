@@ -1,7 +1,8 @@
 {
   "name": "plan-to-agents",
-  "description": "Four-harness plan routing (Claude Code, Cursor, opencode, Pi): save approved plans to docs/plans/ and two-step dispatch (save only or orchestrate via a chosen backend)",
+  "description": "Four-harness plan routing (Claude Code, Cursor, opencode, Pi): save approved plans to docs/plans/, two-step dispatch (save only or orchestrate via a chosen backend), and configurable per-harness model defaults via /plan-to-agents:configure",
   "author": { "name": "Joe MoCode" },
   "repository": "https://github.com/joemocode-business/joemocode-llm-plugins",
-  "keywords": ["planning", "delegation", "hooks", "ExitPlanMode", "subagents", "opencode", "pi", "two-step-dispatch", "docs/plans"]
+  "keywords": ["planning", "delegation", "hooks", "ExitPlanMode", "subagents", "opencode", "pi", "two-step-dispatch", "docs/plans", "config", "model-selection"]
 }
+
