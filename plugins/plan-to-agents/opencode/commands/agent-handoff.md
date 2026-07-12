@@ -17,7 +17,7 @@ Ask the user:
 
 ## 2. Pick doer backend (dispatch only)
 
-If dispatching, ask for a doer backend. When the plugin config's `enabled_harnesses` is set, offer **only** those harnesses; otherwise offer all four: **Claude Code**, **Cursor**, **opencode**, or **Pi**.
+If dispatching, ask for a doer backend. When the plugin config's `enabled_harnesses` is set and non-empty, offer **only** those harnesses; otherwise offer all four: **Claude Code**, **Cursor**, **opencode**, or **Pi**.
 
 ## 3. Orchestrate
 
@@ -28,6 +28,6 @@ Follow `plan-to-agents-shared/orchestration-pattern.md` and `plan-to-agents-shar
 | When | How |
 |------|-----|
 | Chosen backend **is opencode** | Native **Task** tool — spawn `plan-phase-implementer` (and `plan-verifier` when criteria need checking) |
-| Chosen backend **is not opencode** | Headless shell-out (`claude -p`, `agent -p --model composer-2.5`, `opencode run -m <model> "<prompt>"`, `pi --mode rpc`) |
+| Chosen backend **is not opencode** | Headless shell-out per the adapters table (e.g. `claude -p`, `agent -p --model composer-2.5`, `opencode run -m <model> "<prompt>"`, `pi --mode rpc`). Resolve `<model>` per `plan-to-agents-shared/model-resolution.md` (configured default → choose from list → ask the user). Save defaults via `/plan-to-agents:configure`. |
 
 Include goal, exact files, and acceptance criteria in every prompt. Use separate worktrees/branches per parallel subtask. Verify each subtask branch diff before reporting.

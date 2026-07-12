@@ -42,7 +42,7 @@ Then branch on the answer.
 ## 3. Pick doer backend (step 2, dispatch only)
 
 If the user chose **Dispatch to agent for orchestration**, call `AskUserQuestion` with the
-doer-backend options. When the plugin config's `enabled_harnesses` is set, present **only** those
+doer-backend options. When the plugin config's `enabled_harnesses` is set and non-empty, present **only** those
 harnesses; otherwise present all four:
 
 - **Claude Code**
@@ -66,7 +66,10 @@ dispatch:
 - When the **chosen doer backend matches the current harness**, orchestrate **in-session** using
   that row's in-session column.
 - When the **chosen backend differs from the current harness**, **shell out** using that row's
-  headless column.
+  headless column (`claude -p`, `agent -p --model composer-2.5`, `opencode run`, `pi --mode rpc`,
+  etc.). Resolve the `<model>` for headless commands per
+  [model-resolution.md](../../shared/model-resolution.md) (configured default → choose from list →
+  ask the user). Save defaults via `/plan-to-agents:configure`.
 
 Include the task goal, exact target files, and acceptance criteria in every dispatch prompt.
 
