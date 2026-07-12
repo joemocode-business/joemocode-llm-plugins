@@ -25,7 +25,7 @@ Ask the user to choose:
 
 ## 2. Pick doer backend (dispatch only)
 
-If dispatching, ask the user to choose a doer backend. When the plugin config's `enabled_harnesses` is set, offer **only** those harnesses; otherwise offer all four: **Claude Code**, **Cursor**, **opencode**, or **Pi**.
+If dispatching, ask the user to choose a doer backend. When the plugin config's `enabled_harnesses` is set and non-empty, offer **only** those harnesses; otherwise offer all four: **Claude Code**, **Cursor**, **opencode**, or **Pi**.
 
 ## 3. Orchestrate (dispatch only)
 

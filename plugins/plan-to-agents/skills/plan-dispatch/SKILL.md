@@ -39,7 +39,7 @@ Then branch on the answer.
 ## 2. Pick doer backend (step 2, dispatch only)
 
 If the user chose **Dispatch to agent for orchestration**, call `AskUserQuestion` with the
-doer-backend options. When the plugin config's `enabled_harnesses` is set, present **only** those
+doer-backend options. When the plugin config's `enabled_harnesses` is set and non-empty, present **only** those
 harnesses; otherwise present all four:
 
 - **Claude Code**
