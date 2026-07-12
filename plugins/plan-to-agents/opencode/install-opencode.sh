@@ -88,7 +88,7 @@ link_markdown() {
 
 link_shared() {
   local file
-  for file in orchestration-pattern.md dispatch-adapters.md; do
+  for file in orchestration-pattern.md dispatch-adapters.md model-resolution.md validate-config.sh; do
     ln -sf "$SOURCE_SHARED/$file" "$TARGET_SHARED/$file"
   done
 }

@@ -110,7 +110,13 @@ Dispatch can use a default model per doer harness so orchestration does not prob
 2. **User default** — `${XDG_CONFIG_HOME:-~/.config}/plan-to-agents/config.json` (per-machine default)
 3. **Neither present** — dispatch asks the user which model to use
 
+Top-level fields shallow-merge with the repo override winning; the `harnesses` map merges
+**per-slug and per-field**, so a repo override of one harness does not drop the user file's other
+harness entries.
+
 Add `.plan-to-agents.json` to `.gitignore` if you use the repo override — it is meant for local or per-project preferences, not committed defaults.
+
+Check a hand-edited config with `bash plugins/plan-to-agents/shared/validate-config.sh <path>`.
 
 | Field | Purpose |
 |-------|---------|
