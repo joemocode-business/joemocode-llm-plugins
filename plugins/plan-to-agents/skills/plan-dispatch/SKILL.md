@@ -38,8 +38,11 @@ Then branch on the answer.
 
 ## 2. Pick doer backend (step 2, dispatch only)
 
-If the user chose **Dispatch to agent for orchestration**, call `AskUserQuestion` with exactly
-these four options:
+If the user chose **Dispatch to agent for orchestration**, call `AskUserQuestion` with the
+doer-backend options. First load the merged plugin config — the repo `<repo-root>/.plan-to-agents.json`
+shallow-merged over the user `config.json`, per [model-resolution.md](../../shared/model-resolution.md).
+When that merged config's `enabled_harnesses` is set and non-empty, present **only** those
+harnesses; otherwise present all four:
 
 - **Claude Code**
 - **Cursor**
@@ -73,7 +76,9 @@ Use [dispatch-adapters.md](../../shared/dispatch-adapters.md) for per-backend di
   that row's in-session column (native subagents, `Task` tool, etc.).
 - When the **chosen backend differs from the current harness**, **shell out** using that row's
   headless column (`claude -p`, `agent -p --model composer-2.5`, `opencode run`, `pi --mode rpc`,
-  etc.).
+  etc.). Resolve the `<model>` for headless commands per
+  [model-resolution.md](../../shared/model-resolution.md) (configured default → choose from list →
+  ask the user). Save defaults via `/plan-to-agents:configure`.
 
 Capture `base=$(git rev-parse --abbrev-ref HEAD)` once per
 [orchestration-pattern.md](../../shared/orchestration-pattern.md).

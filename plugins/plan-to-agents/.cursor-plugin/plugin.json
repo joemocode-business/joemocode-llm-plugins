@@ -1,10 +1,10 @@
 {
   "name": "plan-to-agents",
   "version": "0.1.0",
-  "description": "Four-harness plan sync and two-step dispatch (save only or orchestrate via Claude Code, Cursor, opencode, or Pi) with implement-plan and agent-handoff skills",
+  "description": "Hand off an approved plan to an alternative harness — save approved plans to docs/plans/ and dispatch (save only or orchestrate via Claude Code, Cursor, opencode, or Pi) with implement-plan and agent-handoff skills.",
   "author": { "name": "Joe MoCode" },
   "repository": "https://github.com/joemocode-business/joemocode-llm-plugins",
-  "keywords": ["planning", "delegation", "subagents", "implement-plan", "opencode", "pi", "two-step-dispatch", "docs/plans"],
+  "keywords": ["planning", "delegation", "subagents", "implement-plan", "opencode", "pi", "two-step-dispatch", "docs/plans", "config", "model-selection"],
   "skills": "./skills/",
   "agents": "./agents/",
   "hooks": "./hooks/hooks-cursor.json"

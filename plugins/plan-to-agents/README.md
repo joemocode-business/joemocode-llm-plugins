@@ -102,6 +102,36 @@ Use this **single install route** only — do not also symlink the same skills i
 
 ---
 
+## Model configuration
+
+Dispatch can use a default model per doer harness so orchestration does not probe or ask every time. Configuration is layered JSON; **first match wins**:
+
+1. **Repo override** — `<repo-root>/.plan-to-agents.json` (optional; gitignorable local override)
+2. **User default** — `${XDG_CONFIG_HOME:-~/.config}/plan-to-agents/config.json` (per-machine default)
+3. **Neither present** — dispatch asks the user which model to use
+
+Top-level fields shallow-merge with the repo override winning; the `harnesses` map merges
+**per-slug and per-field**, so a repo override of one harness does not drop the user file's other
+harness entries.
+
+Add `.plan-to-agents.json` to `.gitignore` if you use the repo override — it is meant for local or per-project preferences, not committed defaults.
+
+Check a hand-edited config with `bash plugins/plan-to-agents/shared/validate-config.sh <path>`.
+
+| Field | Purpose |
+|-------|---------|
+| `enabled_harnesses` | Harnesses this install uses (subset of canonical slugs) |
+| `harnesses.<slug>.default_model` | Default model slug for that harness |
+| `harnesses.<slug>.models` | Optional allowlist of models for that harness |
+
+Canonical harness slugs: `claude-code`, `cursor`, `opencode`, `pi`.
+
+Reference: [`config.example.json`](config.example.json) for a full example; [`shared/model-resolution.md`](shared/model-resolution.md) for how dispatch resolves models from config.
+
+**Setup skill:** `/plan-to-agents:configure` walks through which harnesses you use and the default model for each.
+
+---
+
 ## Components
 
 | Type | File | Role |
