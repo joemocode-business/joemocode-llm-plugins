@@ -12,8 +12,11 @@ Config is layered; **first match wins** per field (see merge below):
 2. **`${XDG_CONFIG_HOME:-$HOME/.config}/plan-to-agents/config.json`** — per-machine default.
 3. **Neither exists** → ask the user at dispatch time.
 
-Config is **shallow, per-field merged**: the repo override wins field-by-field over the user-level
-file; unset fields inherit from the user file.
+Top-level fields are **shallow-merged** with the repo override winning field-by-field; unset
+top-level fields inherit from the user file. The `harnesses` map is merged **per-slug and
+per-field**: a repo override of one harness does not drop the user file's other harness entries.
+
+Validate any config file (repo override or user default) with `shared/validate-config.sh`.
 
 ## Schema
 
@@ -31,8 +34,8 @@ See `config.example.json` in the plugin root for a full example.
 
 Given a chosen harness `<h>`:
 
-1. **Load config** — repo override merged onto user default (shallow, per-field); treat as empty
-   if neither file exists.
+1. **Load config** — repo override merged onto user default (top-level fields shallow-merge; each
+   `harnesses.<slug>` entry merges per-field); treat as empty if neither file exists.
 2. If `harnesses.<h>.default_model` is set → **use it** and dispatch.
 3. Else if `harnesses.<h>.models` has **2 or more** entries → call `AskUserQuestion` to pick one
    from that list.

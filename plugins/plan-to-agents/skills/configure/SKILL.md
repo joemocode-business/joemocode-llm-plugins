@@ -49,8 +49,12 @@ to enumerate models — ask the user.
 `${XDG_CONFIG_HOME:-$HOME/.config}/plan-to-agents/config.json`, merging onto any existing config
 rather than clobbering unrelated fields. Confirm the path to the user.
 
+Run `shared/validate-config.sh` on the written file. If validation fails, surface the error output
+to the user and do not treat the config as saved until it passes.
+
 ## 5. Report
 
-Show the resulting config and note how dispatch will use it (see `shared/model-resolution.md`):
-repo override shallow-merges onto this user file; `default_model` skips prompts; `models` with two
-or more entries triggers a picker; otherwise dispatch asks once per harness.
+Show the resulting config, note that it was validated successfully, and explain how dispatch will
+use it (see `shared/model-resolution.md`): top-level fields shallow-merge with the repo override
+winning; the `harnesses` map merges per-slug and per-field; `default_model` skips prompts; `models`
+with two or more entries triggers a picker; otherwise dispatch asks once per harness.
