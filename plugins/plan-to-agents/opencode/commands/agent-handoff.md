@@ -17,7 +17,7 @@ Ask the user:
 
 ## 2. Pick doer backend (dispatch only)
 
-If dispatching, ask for a doer backend. When the plugin config's `enabled_harnesses` is set and non-empty, offer **only** those harnesses; otherwise offer all four: **Claude Code**, **Cursor**, **opencode**, or **Pi**.
+If dispatching, ask for a doer backend. First load the merged plugin config — the repo `<repo-root>/.plan-to-agents.json` shallow-merged over the user `config.json`, per `plan-to-agents-shared/model-resolution.md`. When that merged config's `enabled_harnesses` is set and non-empty, offer **only** those harnesses; otherwise offer all four: **Claude Code**, **Cursor**, **opencode**, or **Pi**.
 
 ## 3. Orchestrate
 
