@@ -30,11 +30,20 @@ Call `AskUserQuestion` with `multiSelect: true` over the four harnesses:
 - **opencode**
 - **Pi**
 
-Write the selection to `enabled_harnesses`. On update, pre-check the currently-enabled ones.
+Map each selected display name to its **canonical slug** before writing (the schema and
+`validate-config.sh` require slugs, not display names):
+
+- **Claude Code** → `claude-code`
+- **Cursor** → `cursor`
+- **opencode** → `opencode`
+- **Pi** → `pi`
+
+Write the mapped slugs to `enabled_harnesses`. On update, pre-check the currently-enabled ones.
 
 ## 3. Set models per harness
 
-For each selected harness, ask for its `default_model`:
+For each selected harness, ask for its `default_model` (key each entry under `harnesses.<slug>` by
+the same canonical slug from step 2):
 
 - **Cursor** — offer `composer-2.5` first.
 - **Claude Code** — offer the harness default (`claude-opus-4-8`) first.

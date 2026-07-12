@@ -93,9 +93,9 @@ if jq -e 'has("harnesses")' "$CONFIG_PATH" >/dev/null; then
 
     if ! jq -e --arg s "$slug" '
       .harnesses[$s].default_model
-      | . == null or type == "string"
+      | . == null or (type == "string" and (. | length) > 0)
     ' "$CONFIG_PATH" >/dev/null; then
-      fail "harnesses.$slug.default_model must be a string or null"
+      fail "harnesses.$slug.default_model must be a non-empty string or null"
     fi
 
     if jq -e --arg s "$slug" '.harnesses[$s] | has("models")' "$CONFIG_PATH" >/dev/null; then

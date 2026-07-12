@@ -23,7 +23,7 @@ Validate any config file (repo override or user default) with `shared/validate-c
 | Field | Meaning |
 |-------|---------|
 | `enabled_harnesses` | Array of canonical harness slugs the user uses. Narrows the dispatch backend picker. Absent or empty → show all four. |
-| `harnesses.<slug>.default_model` | String model id passed straight to the headless command. `null` or absent = not set. |
+| `harnesses.<slug>.default_model` | Non-empty string model id passed straight to the headless command. `null`, absent, or empty string = not set. |
 | `harnesses.<slug>.models` | Optional choose-from list of model ids. |
 
 **Canonical harness slugs:** `claude-code`, `cursor`, `opencode`, `pi`.
@@ -36,7 +36,7 @@ Given a chosen harness `<h>`:
 
 1. **Load config** — repo override merged onto user default (top-level fields shallow-merge; each
    `harnesses.<slug>` entry merges per-field); treat as empty if neither file exists.
-2. If `harnesses.<h>.default_model` is set → **use it** and dispatch.
+2. If `harnesses.<h>.default_model` is set (a non-empty string) → **use it** and dispatch.
 3. Else if `harnesses.<h>.models` has **2 or more** entries → call `AskUserQuestion` to pick one
    from that list.
 4. Else → call `AskUserQuestion` asking the user to type the model id, offering the well-known
