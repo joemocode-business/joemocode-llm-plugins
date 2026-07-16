@@ -6,6 +6,15 @@ disable-model-invocation: false
 
 # Planning
 
+## Runtime operations
+
+| Harness | Plan authoring | Post-approval dispatch |
+|---------|----------------|------------------------|
+| Claude Code | Plan Mode + this skill | `plan-dispatch` skill (via `ExitPlanMode` hook) |
+| Cursor | Plan Mode + this skill | `plan-dispatch` skill (via `afterFileEdit` hook) |
+| opencode | Built-in Plan agent + `/planning` skill | `/plan-dispatch` skill |
+| Pi | This skill + `/planning` if needed | `/plan-dispatch` prompt |
+
 Use this skill whenever you write, draft, or refine an implementation plan.
 
 ## 1. Read the template
@@ -43,7 +52,7 @@ YYYY-MM-DD-<descriptive-kebab-name>.md
 
 where the date is the day the plan was created and the name is a 3–6 word kebab-case summary of the task (not a random slug) — e.g. `2026-06-10-add-last-updated-frontmatter.md`.
 
-All planners (Claude Code, Cursor, opencode, Pi) should save plans to `<repo>/docs/plans/` using the filename above. In the parent harness's Plan Mode the harness may fix the path while you draft; **plan-dispatch** performs the final rename at save time into `docs/plans/`. To make that rename unambiguous, record the intended filename in the plan body (e.g. a short note near the top or in a `## Metadata` line):
+All planners (Claude Code, Cursor, opencode, Pi) should save plans to `<repo>/docs/plans/` using the filename above. In the parent harness's Plan Mode the harness may fix the path while you draft; **plan-dispatch** (skill or `/plan-dispatch` prompt on Pi) performs the final rename at save time into `docs/plans/`. To make that rename unambiguous, record the intended filename in the plan body (e.g. a short note near the top or in a `## Metadata` line):
 
 ```
 Intended filename: YYYY-MM-DD-<descriptive-kebab-name>.md

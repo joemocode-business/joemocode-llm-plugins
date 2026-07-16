@@ -2,9 +2,20 @@
 name: configure
 description: Set up or update per-harness model defaults for plan-to-agents dispatch. Records which harnesses you use (Claude Code, Cursor, opencode, Pi) and the default model for each, so dispatch never has to ask or probe. User-invoked.
 disable-model-invocation: true
+metadata:
+  opencode/autoinvoke: "false"
 ---
 
 # Configure
+
+## Runtime operations
+
+| Harness | User questions | Invocation |
+|---------|----------------|------------|
+| Claude Code | `AskUserQuestion` | `/plan-to-agents:configure` skill |
+| Cursor | `AskUserQuestion` | `/plan-to-agents:configure` skill |
+| opencode | `question` | `/configure` skill (explicit-only; `metadata.opencode/autoinvoke: false`) |
+| Pi | `question` | `/configure` prompt |
 
 Set up or update per-harness model defaults for plan-to-agents dispatch. Records which harnesses
 you use and the default model for each, so dispatch never has to ask or probe.
@@ -23,7 +34,9 @@ user before making changes.
 
 ## 2. Pick enabled harnesses
 
-Call `AskUserQuestion` with `multiSelect: true` over the four harnesses:
+Call the harness question tool with `multiSelect: true` over the four harnesses:
+
+Use **`AskUserQuestion`** on Claude Code and Cursor; use **`question`** on opencode and Pi.
 
 - **Claude Code**
 - **Cursor**

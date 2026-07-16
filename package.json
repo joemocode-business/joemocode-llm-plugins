@@ -5,7 +5,8 @@
     "skills": ["./plugins/*/skills/*"],
     "extensions": [
       "./plugins/plan-to-agents/pi/extensions/subagent/index.ts",
-      "./plugins/plan-to-agents/pi/extensions/question.ts"
+      "./plugins/plan-to-agents/pi/extensions/question.ts",
+      "./plugins/session-handoff/pi/extensions/precompact-handoff.ts"
     ],
     "prompts": ["./plugins/plan-to-agents/pi/prompts"]
   },

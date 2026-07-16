@@ -6,6 +6,15 @@ disable-model-invocation: false
 
 # Agent handoff
 
+## Runtime operations
+
+| Harness | User questions | Subagent delegation | Shared docs | Configure |
+|---------|----------------|---------------------|-------------|-----------|
+| Claude Code | `AskUserQuestion` | `Task` | `shared/*.md` in plugin | `/plan-to-agents:configure` |
+| Cursor | `AskUserQuestion` | `Task` | `shared/*.md` in plugin | `/plan-to-agents:configure` |
+| opencode | `question` | `task` | `.opencode/plan-to-agents-shared/` or `~/.config/opencode/plan-to-agents-shared/` | `/configure` |
+| Pi | `question` | `subagent` | `plugins/plan-to-agents/shared/*.md` | `/configure` prompt |
+
 Explicit delegation outside the plan-approval flow. Use this when the user wants work dispatched to a subagent without entering Plan Mode or waiting for `ExitPlanMode`.
 
 ## When to use
@@ -25,14 +34,16 @@ Extract from the user's request and recent context:
 | **Task goal** | One-sentence objective |
 | **Target files** | Paths to read or modify |
 | **Acceptance criteria** | How to know the task is done |
-| **Model preference** | Per [model-resolution.md](../../shared/model-resolution.md) for the chosen backend (configured default → ask the user); save defaults via `/plan-to-agents:configure` |
+| **Model preference** | Per [model-resolution.md](../../shared/model-resolution.md) for the chosen backend (configured default → ask via `AskUserQuestion` or `question`); save defaults via the configure entry point for your harness |
 | **Parallel vs sequential** | Independent subtasks that can run concurrently, or ordered dependencies |
 
 If anything is ambiguous, ask a short clarifying question before proceeding.
 
 ## 2. Ask how to proceed (step 1)
 
-Call `AskUserQuestion` with exactly these options:
+Call the harness question tool with exactly these options:
+
+Use **`AskUserQuestion`** on Claude Code and Cursor; use **`question`** on opencode and Pi.
 
 - **Dispatch to agent for orchestration** — split the task into subtasks and dispatch to a doer backend
 - **Cancel** — stop without dispatching
@@ -41,7 +52,7 @@ Then branch on the answer.
 
 ## 3. Pick doer backend (step 2, dispatch only)
 
-If the user chose **Dispatch to agent for orchestration**, call `AskUserQuestion` with the
+If the user chose **Dispatch to agent for orchestration**, call the harness question tool with the
 doer-backend options. First load the merged plugin config — the repo `<repo-root>/.plan-to-agents.json`
 shallow-merged over the user `config.json`, per [model-resolution.md](../../shared/model-resolution.md).
 When that merged config's `enabled_harnesses` is set and non-empty, present **only** those
@@ -66,12 +77,12 @@ verify → report. Use [dispatch-adapters.md](../../shared/dispatch-adapters.md)
 dispatch:
 
 - When the **chosen doer backend matches the current harness**, orchestrate **in-session** using
-  that row's in-session column.
+  that row's in-session column (`Task` on Claude/Cursor, `task` on opencode, `subagent` on Pi).
 - When the **chosen backend differs from the current harness**, **shell out** using that row's
-  headless column (`claude -p`, `agent -p --model composer-2.5`, `opencode run`, `pi --mode rpc`,
-  etc.). Resolve the `<model>` for headless commands per
+  headless column (`claude -p`, `agent -p --model <model>`, `opencode run -m <model>`, `pi --mode rpc`
+  or `pi -p`, etc.). Resolve the `<model>` for headless commands per
   [model-resolution.md](../../shared/model-resolution.md) (configured default → choose from list →
-  ask the user). Save defaults via `/plan-to-agents:configure`.
+  ask the user). Save defaults via the configure entry point for your harness (see Runtime operations).
 
 Include the task goal, exact target files, and acceptance criteria in every dispatch prompt.
 

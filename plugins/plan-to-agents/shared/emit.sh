@@ -7,6 +7,7 @@ PLUGIN_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 ROLES_DIR="$SCRIPT_DIR/roles"
 AGENTS_DIR="$PLUGIN_DIR/agents"
 OPENCODE_AGENTS_DIR="$PLUGIN_DIR/opencode/agents"
+PI_AGENTS_DIR="$PLUGIN_DIR/pi/agents"
 
 role_name() {
   case "$1" in
@@ -74,6 +75,28 @@ emit_opencode_agents() {
   done
 }
 
-mkdir -p "$AGENTS_DIR" "$OPENCODE_AGENTS_DIR"
+emit_pi_agents() {
+  local role stem body_file out_file
+  for role in $(cd "$ROLES_DIR" && printf '%s\n' *.md | LC_ALL=C sort); do
+    stem="${role%.md}"
+    body_file="$ROLES_DIR/$role"
+    out_file="$PI_AGENTS_DIR/$stem.md"
+
+    {
+      printf '%s\n' "---"
+      printf 'name: %s\n' "$(role_name "$stem")"
+      printf 'description: %s\n' "$(role_description "$stem")"
+      if [ "$stem" = "plan-verifier" ]; then
+        printf 'tools: read,grep,find,ls,bash\n'
+      fi
+      printf '%s\n' "---"
+      printf '\n'
+      cat "$body_file"
+    } >"$out_file"
+  done
+}
+
+mkdir -p "$AGENTS_DIR" "$OPENCODE_AGENTS_DIR" "$PI_AGENTS_DIR"
 emit_claude_cursor_agents
 emit_opencode_agents
+emit_pi_agents

@@ -2,10 +2,21 @@
 name: implement-plan
 description: Implement a plan file by orchestrating parallel subagents per phase, then verifying acceptance criteria. Use when the user provides a plan file path (e.g. docs/plans/YYYY-MM-DD-name.md) or names a specific plan to implement. Requires an explicit plan path — do not run without one.
 disable-model-invocation: true
+metadata:
+  opencode/autoinvoke: "false"
 ---
 # Implement Plan
 
-Implement a plan file using parallel composer subagents for large plans, a single subagent for small plans, then a verifier.
+## Runtime operations
+
+| Harness | Subagent delegation | Explicit entry | Configure |
+|---------|---------------------|----------------|-----------|
+| Claude Code | `Task` (`plan-phase-implementer`, `plan-verifier`) | `/plan-to-agents:implement-plan` skill | `/plan-to-agents:configure` |
+| Cursor | `Task` (`plan-phase-implementer`, `plan-verifier`) | `/plan-to-agents:implement-plan` skill | `/plan-to-agents:configure` |
+| opencode | `task` (`plan-phase-implementer`, `plan-verifier`) | `/implement-plan` skill (explicit-only; `metadata.opencode/autoinvoke: false`) | `/configure` |
+| Pi | `subagent` (`plan-phase-implementer`, `plan-verifier`) | `/implement-plan` prompt | `/configure` prompt |
+
+Implement a plan file using parallel subagents for large plans, a single subagent for small plans, then a verifier.
 
 ## 1. Read the plan
 
@@ -25,11 +36,13 @@ If no acceptance criteria section exists, derive criteria from the plan's "after
 | Size | Condition | Action |
 |------|-----------|--------|
 | Small | ≤2 phases AND ≤6 tasks total | One `plan-phase-implementer` with the full plan |
-| Large | 3+ phases OR 7+ tasks | Multiple `plan-phase-implementer` Tasks, one per independent phase group |
+| Large | 3+ phases OR 7+ tasks | Multiple `plan-phase-implementer` dispatches, one per independent phase group |
+
+On Claude Code and Cursor, fire **`Task`** calls. On opencode, fire **`task`** calls. On Pi, fire **`subagent`** calls (parallel `tasks` array when groups are independent).
 
 ## 3. For large plans — identify parallelizable groups
 
-- Phases that touch **different files** → run in parallel (separate Task calls in one response)
+- Phases that touch **different files** → run in parallel (separate delegation calls in one response)
 - Phases that share files, or where one `depends on` another → group together and run sequentially within a single implementer Task
 - When file overlap is unclear, put each phase in its own group and let the implementer run them sequentially
 
@@ -37,12 +50,12 @@ If no acceptance criteria section exists, derive criteria from the plan's "after
 
 Capture the feature branch once: `base=$(git rev-parse --abbrev-ref HEAD)`.
 
-For parallelizable phase groups, each `Task` subagent should work in its own branch/worktree off `$base` and commit there — following [orchestration-pattern.md](../../shared/orchestration-pattern.md) — so per-phase diffs are reviewable as separate branches before merging back.
+For parallelizable phase groups, each subagent should work in its own branch/worktree off `$base` and commit there — following [orchestration-pattern.md](../../shared/orchestration-pattern.md) — so per-phase diffs are reviewable as separate branches before merging back.
 
-For each independent group, fire a `Task` tool call using the `plan-phase-implementer` subagent.
+For each independent group, dispatch a **`plan-phase-implementer`** subagent (see Runtime operations for the harness tool name).
 Fire all independent groups **in the same response** (parallel).
 
-Inject this prompt per Task:
+Inject this prompt per subagent:
 
 ```
 Implement the following phase(s) of the plan.
@@ -59,7 +72,7 @@ Implement the following phase(s) of the plan.
 Report back: files changed, commands run, blockers.
 ```
 
-Wait for all implementer Tasks to complete before continuing.
+Wait for all implementer subagents to complete before continuing.
 
 ## 5. Collect results and check for blockers
 
@@ -75,7 +88,7 @@ Merge verified implementer branches back into `$base` (sequentially when phases 
 
 ## 7. Spawn verifier
 
-Fire one `plan-verifier` Task with:
+Fire one **`plan-verifier`** subagent (see Runtime operations) with:
 
 ```
 **Base branch:** $base
@@ -92,7 +105,7 @@ Fire one `plan-verifier` Task with:
 If the verifier reports any `FAIL` criteria or code-review annotations requiring changes:
 
 1. Identify which phases own the failing code
-2. Spawn a new `plan-phase-implementer` Task for each failing group, passing:
+2. Spawn a new **`plan-phase-implementer`** subagent for each failing group, passing:
    - The specific failing criteria as the "Acceptance criteria to fix"
    - The verifier's evidence / code-review annotations as context
 3. Wait for the fix implementer(s) to complete, then re-run the verifier (step 7) once more

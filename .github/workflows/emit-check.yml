@@ -11,5 +11,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Regenerate agent files from shared roles
         run: bash plugins/plan-to-agents/shared/emit.sh
+      - name: Pi structural smoke
+        run: node plugins/plan-to-agents/pi/scripts/smoke-structure.mjs
+      - name: Pi unit tests
+        run: |
+          node plugins/plan-to-agents/pi/tests/agents-discovery.test.mjs
+          node --experimental-strip-types --test plugins/session-handoff/pi/tests/compaction-guard.test.ts
       - name: Fail if generated files are stale
         run: git diff --exit-code

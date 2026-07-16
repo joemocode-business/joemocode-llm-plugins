@@ -44,8 +44,8 @@ function checkPackageJson() {
 	if (!Array.isArray(pkg.pi.skills) || pkg.pi.skills.length === 0) {
 		fail("package.json pi.skills must be non-empty");
 	}
-	if (!Array.isArray(pkg.pi.extensions) || pkg.pi.extensions.length < 2) {
-		fail("package.json pi.extensions must list subagent and question extensions");
+	if (!Array.isArray(pkg.pi.extensions) || pkg.pi.extensions.length < 3) {
+		fail("package.json pi.extensions must list subagent, question, and session-handoff extensions");
 	}
 	if (!Array.isArray(pkg.pi.prompts) || pkg.pi.prompts.length === 0) {
 		fail("package.json pi.prompts must be set");
@@ -109,25 +109,35 @@ function checkExtensions() {
 	ok("extension upstream references");
 }
 
-function checkAgentsDirPlaceholder() {
+function checkAgentsDir() {
 	const agentsDir = path.join(PI_ROOT, "agents");
+	const required = ["plan-phase-implementer.md", "plan-verifier.md"];
 	if (!fs.existsSync(agentsDir)) {
-		ok("agents/ directory pending emit.sh generation (expected in Wave 2)");
+		fail("missing pi/agents/ directory — run shared/emit.sh");
 		return;
 	}
-	const mdFiles = fs.readdirSync(agentsDir).filter((f) => f.endsWith(".md"));
-	if (mdFiles.length === 0) {
-		ok("agents/ exists but empty — emit.sh integration pending");
-	} else {
-		ok(`agents/ has ${mdFiles.length} markdown file(s)`);
+	for (const name of required) {
+		const filePath = path.join(agentsDir, name);
+		if (!assertExists(filePath, `generated agent ${name}`)) continue;
+		const text = fs.readFileSync(filePath, "utf8");
+		if (!/^---\nname: /m.test(text)) {
+			fail(`${name} missing Pi name frontmatter`);
+		}
+		if (!/^description: /m.test(text)) {
+			fail(`${name} missing description frontmatter`);
+		}
+		if (name === "plan-verifier.md" && !/^tools: read,grep,find,ls,bash$/m.test(text)) {
+			fail("plan-verifier.md must restrict tools to read,grep,find,ls,bash");
+		}
 	}
+	ok("generated Pi agents from emit.sh");
 }
 
 console.log("plan-to-agents Pi structural smoke\n");
 checkPackageJson();
 checkExtensions();
 checkPrompts();
-checkAgentsDirPlaceholder();
+checkAgentsDir();
 
 if (process.exitCode) {
 	console.error("\nSmoke checks failed.");

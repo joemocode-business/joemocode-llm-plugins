@@ -5,6 +5,17 @@ description: After a plan is approved (via the plan-to-agents plugin), ask how t
 
 # Plan dispatch
 
+## Runtime operations
+
+| Harness | User questions | Subagent delegation | Shared docs | Configure |
+|---------|----------------|---------------------|-------------|-----------|
+| Claude Code | `AskUserQuestion` | `Task` (`plan-phase-implementer`, `plan-verifier`) | `shared/*.md` in plugin | `/plan-to-agents:configure` |
+| Cursor | `AskUserQuestion` | `Task` (`plan-phase-implementer`, `plan-verifier`) | `shared/*.md` in plugin | `/plan-to-agents:configure` |
+| opencode | `question` | `task` (`plan-phase-implementer`, `plan-verifier`) | `.opencode/plan-to-agents-shared/` or `~/.config/opencode/plan-to-agents-shared/` | `/configure` |
+| Pi | `question` | `subagent` (`plan-phase-implementer`, `plan-verifier`) | `plugins/plan-to-agents/shared/*.md` | `/configure` prompt |
+
+Pi orchestrators may use the `/plan-dispatch` prompt template instead of loading this skill body directly.
+
 A plan was just approved. The approval hook has already auto-saved the plan into the repo at
 `<CWD>/docs/plans/`. Do NOT start implementing yet — first conform the saved plan to the
 template, then ask the user how to proceed.
@@ -28,17 +39,19 @@ branches below.
 
 ## 1. Ask how to proceed (step 1)
 
-Call `AskUserQuestion` with exactly these two options:
+Call the harness question tool with exactly these two options:
 
 - **Save plan only** — keep the saved plan, do nothing else.
 - **Dispatch to agent for orchestration** — split the plan into subtasks and dispatch to a doer
   backend.
 
+Use **`AskUserQuestion`** on Claude Code and Cursor; use **`question`** on opencode and Pi.
+
 Then branch on the answer.
 
 ## 2. Pick doer backend (step 2, dispatch only)
 
-If the user chose **Dispatch to agent for orchestration**, call `AskUserQuestion` with the
+If the user chose **Dispatch to agent for orchestration**, call the harness question tool with the
 doer-backend options. First load the merged plugin config — the repo `<repo-root>/.plan-to-agents.json`
 shallow-merged over the user `config.json`, per [model-resolution.md](../../shared/model-resolution.md).
 When that merged config's `enabled_harnesses` is set and non-empty, present **only** those
@@ -73,12 +86,12 @@ subtask off `$base` → dispatch → verify → merge → run plan Verification 
 Use [dispatch-adapters.md](../../shared/dispatch-adapters.md) for per-backend dispatch:
 
 - When the **chosen doer backend matches the current harness**, orchestrate **in-session** using
-  that row's in-session column (native subagents, `Task` tool, etc.).
+  that row's in-session column (`Task` on Claude/Cursor, `task` on opencode, `subagent` on Pi).
 - When the **chosen backend differs from the current harness**, **shell out** using that row's
-  headless column (`claude -p`, `agent -p --model composer-2.5`, `opencode run`, `pi --mode rpc`,
-  etc.). Resolve the `<model>` for headless commands per
+  headless column (`claude -p`, `agent -p --model <model>`, `opencode run -m <model>`, `pi --mode rpc`
+  or `pi -p`, etc.). Resolve the `<model>` for headless commands per
   [model-resolution.md](../../shared/model-resolution.md) (configured default → choose from list →
-  ask the user). Save defaults via `/plan-to-agents:configure`.
+  ask the user). Save defaults via the configure entry point for your harness (see Runtime operations).
 
 Capture `base=$(git rev-parse --abbrev-ref HEAD)` once per
 [orchestration-pattern.md](../../shared/orchestration-pattern.md).

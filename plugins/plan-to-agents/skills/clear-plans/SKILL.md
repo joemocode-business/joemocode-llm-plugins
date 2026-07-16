@@ -2,9 +2,20 @@
 name: clear-plans
 description: Clear out old plan files from the repo's docs/plans/ directory. Lists existing plans, lets the user pick which to remove, then archives them to docs/archive/plans/ or deletes them — always confirming first. User-invoked cleanup.
 disable-model-invocation: true
+metadata:
+  opencode/autoinvoke: "false"
 ---
 
 # Clear plans
+
+## Runtime operations
+
+| Harness | User questions | Invocation |
+|---------|----------------|------------|
+| Claude Code | `AskUserQuestion` | `/plan-to-agents:clear-plans` skill |
+| Cursor | `AskUserQuestion` | `/plan-to-agents:clear-plans` skill |
+| opencode | `question` | `/clear-plans` skill (explicit-only; `metadata.opencode/autoinvoke: false`) |
+| Pi | `question` | `/clear-plans` prompt |
 
 Clear out old plan files from the repo's canonical `<CWD>/docs/plans/` directory. List the plans,
 let the user pick which to remove, then archive or delete them — always confirming first.
@@ -18,13 +29,16 @@ date in the filename) so the user can judge staleness.
 
 ## 2. Let the user pick which to clear
 
-Call `AskUserQuestion` with `multiSelect: true`, listing the plan files as options so the user
-selects which to remove. If the list is long, present them oldest-first; the user may also say
+Call the harness question tool with `multiSelect: true`, listing the plan files as options so the user
+selects which to remove. Use **`AskUserQuestion`** on Claude Code and Cursor; use **`question`** on
+opencode and Pi. If the list is long, present them oldest-first; the user may also say
 "all".
 
 ## 3. Confirm archive vs delete
 
-Call `AskUserQuestion` (single-select) with exactly two options:
+Call the harness question tool (single-select) with exactly two options:
+
+Use **`AskUserQuestion`** on Claude Code and Cursor; use **`question`** on opencode and Pi.
 
 - **Archive** — move the selected plans to `docs/archive/plans/`.
 - **Delete** — permanently remove the selected plans.
