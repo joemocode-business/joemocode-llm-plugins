@@ -1,10 +1,12 @@
 # joemocode-llm-plugins
 
-Joe's personal plugin library for sharing — dual-platform plugins for [Claude Code](https://code.claude.com/docs/en/quickstart) and [Cursor](https://cursor.com). Each plugin ships manifests for both environments.
+Joe's personal plugin library for sharing. Ships reusable agent behavior for [Claude Code](https://code.claude.com/docs/en/quickstart), [Cursor](https://cursor.com), [opencode](https://opencode.ai), and [Pi](https://pi.dev). Claude Code and Cursor install from marketplace manifests; opencode and Pi use harness-specific installers documented in each plugin README.
 
 ## Install (one-time per machine)
 
-Add the marketplace once, then install plugins by name. Works the same in **Claude Code** and **Cursor**:
+### Claude Code and Cursor
+
+Add the marketplace once, then install plugins by name:
 
 ```text
 /plugin marketplace add https://github.com/joemocode-business/joemocode-llm-plugins
@@ -13,11 +15,17 @@ Add the marketplace once, then install plugins by name. Works the same in **Clau
 
 Restart after install so hooks and skills load.
 
-> **Cursor:** use the full `https://github.com/...` URL as shown. The `owner/repo` shorthand only works in Claude Code — Cursor's CLI rejects it and prompts for a URL.
+> **Cursor:** use the full `https://github.com/...` URL as shown. The `owner/repo` shorthand only works in Claude Code. Cursor's CLI rejects it and prompts for a URL.
 
-**Marketplace name:** install commands use `@joemocode-llm-plugins` — that is the `name` in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json), not necessarily the GitHub repo slug.
+**Marketplace name:** install commands use `@joemocode-llm-plugins`. That is the `name` in [`.claude-plugin/marketplace.json`](.claude-plugin/marketplace.json) and [`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json), not necessarily the GitHub repo slug.
 
-**Private repo:** ensure your git credentials work for `joemocode-business/joemocode-llm-plugins` (e.g. `gh auth login`). For Claude Code background updates, set `GITHUB_TOKEN` or `GH_TOKEN` if needed.
+**Native Cursor catalog:** this repo ships [`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json) alongside the Claude catalog. Cursor Team Marketplace import and runtime hook behavior still need manual verification after install (see each plugin README test checklist).
+
+**Private repo:** ensure git credentials work for `joemocode-business/joemocode-llm-plugins` (e.g. `gh auth login`). For Claude Code background updates, set `GITHUB_TOKEN` or `GH_TOKEN` if needed.
+
+### opencode and Pi
+
+See [plugins/plan-to-agents/README.md](./plugins/plan-to-agents/README.md) for `install-opencode.sh` and `pi install git:…@<sha>`.
 
 ### Updates
 
@@ -83,8 +91,8 @@ Restart after install. See [Plannotator docs](https://plannotator.ai/docs/gettin
 
 | Plugin | Description |
 |--------|-------------|
-| [plan-to-agents](./plugins/plan-to-agents/README.md) | Post-plan agent delegation: Claude→Cursor CLI, Cursor→Task subagents |
-| [session-handoff](./plugins/session-handoff/README.md) | PreCompact hook + research/agent-prompt handoff artifacts: at compaction time, finish the request or capture the session for a fresh agent (forked from [mattpocock/skills](https://github.com/mattpocock/skills)) |
+| [plan-to-agents](./plugins/plan-to-agents/README.md) | Post-plan delegation across Claude Code, Cursor, opencode, and Pi: save to `docs/plans/`, two-step dispatch, cross-harness orchestration |
+| [session-handoff](./plugins/session-handoff/README.md) | PreCompact hook (Claude Code) plus Pi compaction guard; research and agent-prompt handoff artifacts. Cursor uses manual skills only (forked from [mattpocock/skills](https://github.com/mattpocock/skills)) |
 
 ## Related external skills
 
@@ -96,12 +104,13 @@ Skills worth installing from upstream rather than re-publishing here. They insta
 
 ## Roadmap
 
-[docs/FUTURE.md](./docs/FUTURE.md) — publish to GitHub, Cursor Team Marketplace, Cursor plan hooks, cloud agent automation, CI, public catalog listing.
+[docs/FUTURE.md](./docs/FUTURE.md) — Team Marketplace dogfood, Cursor plan hooks, cloud agent automation, public catalog listing.
 
 ## Validate
 
 ```bash
 node scripts/validate-marketplace.mjs
+node --test scripts/validate-marketplace.test.mjs
 ```
 
 ## License

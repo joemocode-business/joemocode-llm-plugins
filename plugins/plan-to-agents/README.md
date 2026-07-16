@@ -8,10 +8,10 @@ Route approved plans and explicit delegation requests to implementer agents acro
 |---------|---------------|-----------|--------------|----------------|-----------|
 | **Claude Code** | skills + hooks | native subagents / `agent` CLI | `ExitPlanMode` hook → `plan-dispatch` skill | shell-out per [`shared/dispatch-adapters.md`](shared/dispatch-adapters.md) | marketplace plugin (`/plugin install`) |
 | **Cursor** | skills + hooks | native `Task` subagents | `afterFileEdit` sync + explicit `implement-plan` / `agent-handoff` | `Task` tool in-session | marketplace plugin (`/plugin install`) |
-| **opencode** | `commands/` + `agents/` markdown | native `Task` subagents | `/plan-dispatch` command (no plan-approved event) | `opencode run -m <model>` headless | [`opencode/install-opencode.sh`](opencode/install-opencode.sh) symlinks into one discovery scope |
-| **Pi** | Agent Skills (`skills/`) | `bash`-to-agent / `pi --mode rpc` | `plan-dispatch` skill (no plan-approved event) | RPC JSONL or `pi -p` print mode | top-level `package.json` `pi` key → `pi install git:…@<sha>` |
+| **opencode** | native skills + `agents/` | `task` tool | built-in Plan agent + `/planning`; `/plan-dispatch` explicit (no plan-approved event) | `task` in-session | [`opencode/install-opencode.sh`](opencode/install-opencode.sh) symlinks skills + agents into one scope |
+| **Pi** | skills + extensions + prompts | `subagent` tool + `pi/agents/*.md` | `/plan-dispatch` prompt (no plan-approved event) | `subagent` tool or RPC/`bash` | top-level `package.json` `pi` key → `pi install git:…@<sha>` |
 
-Canonical role bodies and orchestration prose live in [`shared/`](shared/) (not auto-discovered by any harness). [`shared/emit.sh`](shared/emit.sh) regenerates Claude/Cursor `agents/*.md` and opencode `opencode/agents/*.md` from `shared/roles/`; [`.github/workflows/emit-check.yml`](../../.github/workflows/emit-check.yml) runs `emit.sh` in CI and fails if generated files drift.
+Canonical role bodies and orchestration prose live in [`shared/`](shared/) (not auto-discovered by any harness). [`shared/emit.sh`](shared/emit.sh) regenerates Claude/Cursor `agents/*.md`, opencode `opencode/agents/*.md`, and Pi `pi/agents/*.md` from `shared/roles/`; [`.github/workflows/emit-check.yml`](../../.github/workflows/emit-check.yml) runs `emit.sh` in CI and fails if generated files drift.
 
 ## Two-step dispatch flow
 
@@ -26,7 +26,7 @@ Post-approval (`plan-dispatch`) and explicit handoff (`agent-handoff`) both use 
 
 - **Claude Code** · **Cursor** · **opencode** · **Pi**
 
-When the chosen backend matches the current harness, orchestrate **in-session** (native subagents, `Task`, etc.). When it differs, **shell out** using the headless column in [`shared/dispatch-adapters.md`](shared/dispatch-adapters.md). Follow [`shared/orchestration-pattern.md`](shared/orchestration-pattern.md) for branch/worktree-per-subtask, verify, merge, and report.
+When the chosen backend matches the current harness, orchestrate **in-session** (native subagents, `Task`, `task`, or `subagent`). When it differs, **shell out** using the headless column in [`shared/dispatch-adapters.md`](shared/dispatch-adapters.md). Follow [`shared/orchestration-pattern.md`](shared/orchestration-pattern.md) for branch/worktree-per-subtask, verify, merge, and report.
 
 ```mermaid
 flowchart TB
@@ -52,8 +52,8 @@ Approved plans are committed at `<repo>/docs/plans/YYYY-MM-DD-<descriptive-name>
 |------|--------------------------|-------------|-----------|
 | Claude Code | Claude harness global plans dir | `docs/plans/` | `save-plan-to-repo.sh` on `ExitPlanMode` |
 | Cursor | `~/.cursor/plans/` | `docs/plans/` | `sync-plan-to-workspace.sh` on `afterFileEdit` |
-| opencode | — | `docs/plans/` | `/plan` command writes directly; `/plan-dispatch` reads from here |
-| Pi | — | `docs/plans/` | `planning` / `plan-dispatch` skills target this path |
+| opencode | — | `docs/plans/` | built-in Plan agent + `/planning` skill; `/plan-dispatch` reads from here |
+| Pi | — | `docs/plans/` | `planning` skill or `/plan-dispatch` prompt |
 
 Filename convention and frontmatter: [`skills/planning/plan-template.md`](skills/planning/plan-template.md).
 
@@ -72,6 +72,8 @@ Cursor requires the full `https://github.com/...` URL; `owner/repo` shorthand is
 
 Updates: `/plugin marketplace update joemocode-llm-plugins` then `/plugin update plan-to-agents@joemocode-llm-plugins`.
 
+**Cursor runtime checks (manual):** after install from git path or Team Marketplace, confirm `afterFileEdit` mirrors `~/.cursor/plans/` into `docs/plans/`, and that `implement-plan` / `agent-handoff` spawn `Task` subagents. There is no proven Cursor hook equivalent to Claude's `ExitPlanMode` dispatch prompt.
+
 ### opencode
 
 From the repo root (project scope):
@@ -86,9 +88,19 @@ Global scope (`~/.config/opencode/`):
 bash plugins/plan-to-agents/opencode/install-opencode.sh --global
 ```
 
-Use **exactly one** scope (project or global, not both). The installer symlinks agents, commands, and `plan-to-agents-shared/` (orchestration + dispatch docs) into that scope. opencode's `"plugin": [...]` npm array loads JS/TS hooks only — it cannot ship markdown agents or slash commands, so this repo uses symlinks (or optional inline `opencode.json` `{file:...}` fragments — never both for the same definitions). See [docs/pidev-setup.md](../../docs/pidev-setup.md#plan-to-agents--opencode).
+Use **exactly one** scope (project or global, not both). The installer symlinks six skills, two generated agents, and `plan-to-agents-shared/` orchestration docs into that scope. It does **not** install a `commands/` directory. Reinstall removes stale command symlinks from older releases.
 
-Commands after install: `/plan`, `/plan-dispatch`, `/implement-plan`, `/agent-handoff`.
+opencode's `"plugin": [...]` npm array loads JS/TS hooks only. It cannot ship markdown agents or skills, so this repo uses symlinks (or optional inline `opencode.json` `{file:...}` fragments — never both for the same definitions). See [docs/pidev-setup.md](../../docs/pidev-setup.md#plan-to-agents--opencode).
+
+**Planner workflow:** switch to opencode's built-in Plan primary agent, then invoke `/planning`. There is no `/plan` command.
+
+**Skills after install:** `/planning`, `/plan-dispatch`, `/implement-plan`, `/configure`, `/agent-handoff`, `/clear-plans`.
+
+**Interactive tools:** skills use opencode's native `question` tool for choices and `task` for `plan-phase-implementer` / `plan-verifier`.
+
+**Permission config:** merge [`opencode/opencode.json.example`](opencode/opencode.json.example) into your `opencode.json` so explicit-only skills (`implement-plan`, `configure`, `clear-plans`) stay denied until invoked. The installer never overwrites an existing config.
+
+Validate a local install: `bash plugins/plan-to-agents/opencode/validate-install.sh`.
 
 ### Pi
 
@@ -98,7 +110,13 @@ Pin a ref and install from the top-level `package.json` `pi` key:
 pi install git:github.com/joemocode-business/joemocode-llm-plugins@<sha-or-tag>
 ```
 
-Use this **single install route** only — do not also symlink the same skills into `~/.claude/skills` or they double-load. See [docs/pidev-setup.md](../../docs/pidev-setup.md#plan-to-agents--pi).
+Use this **single install route** only. Do not also symlink the same skills into `~/.claude/skills` or they double-load. See [docs/pidev-setup.md](../../docs/pidev-setup.md#plan-to-agents--pi).
+
+**Package contents:** six skills (from both plugins), three TypeScript extensions (`question`, `subagent`, and session-handoff's compaction guard), four prompt templates under `pi/prompts/`, and generated `pi/agents/*.md` for the `subagent` tool.
+
+**Prompt templates:** `/plan-dispatch`, `/implement-plan`, `/configure`, `/clear-plans`.
+
+**Delegation:** `subagent` spawns isolated Pi child sessions using package-local `pi/agents/*.md`. Project-local `.pi/agents/` loads only when `agentScope` is `project` or `both` and the user confirms for trusted repos. Live dispatch needs working provider credentials on the machine.
 
 ---
 
@@ -128,7 +146,7 @@ Canonical harness slugs: `claude-code`, `cursor`, `opencode`, `pi`.
 
 Reference: [`config.example.json`](config.example.json) for a full example; [`shared/model-resolution.md`](shared/model-resolution.md) for how dispatch resolves models from config.
 
-**Setup skill:** `/plan-to-agents:configure` walks through which harnesses you use and the default model for each.
+**Setup:** `/plan-to-agents:configure` on Claude Code and Cursor; `/configure` skill on opencode; `/configure` prompt on Pi.
 
 ---
 
@@ -144,14 +162,19 @@ Reference: [`config.example.json`](config.example.json) for a full example; [`sh
 | **Hook** | `hooks/plan-dispatch.sh` | Claude: steer to `plan-dispatch` after approval |
 | **Hook** | `hooks/sync-plan-to-workspace.sh` | Cursor: mirror plan edits → `docs/plans/` |
 | **Skill** | `skills/plan-dispatch/SKILL.md` | Two-step post-approval dispatch |
-| **Skill** | `skills/implement-plan/SKILL.md` | Phase-based Task orchestration + verification |
+| **Skill** | `skills/implement-plan/SKILL.md` | Phase-based orchestration + verification |
 | **Skill** | `skills/agent-handoff/SKILL.md` | Explicit delegation without plan approval |
 | **Skill** | `skills/planning/SKILL.md` | Plan writing conventions + frontmatter |
+| **Skill** | `skills/configure/SKILL.md` | Per-harness model defaults (explicit-only) |
+| **Skill** | `skills/clear-plans/SKILL.md` | Archive or delete old plans (explicit-only) |
 | **Agent** | `agents/plan-phase-implementer.md` | Implements one phase/group (generated) |
 | **Agent** | `agents/plan-verifier.md` | Verifies acceptance criteria from the diff |
-| **opencode** | `opencode/commands/*.md` | Slash commands for plan / dispatch / implement / handoff |
-| **opencode** | `opencode/agents/*.md` | Subagent definitions (generated) |
-| **opencode** | `opencode/install-opencode.sh` | Symlink installer into one discovery scope |
+| **opencode** | `opencode/install-opencode.sh` | Symlink installer for skills + agents |
+| **opencode** | `opencode/opencode.json.example` | `permission.skill` and `permission.task` denies |
+| **Pi** | `pi/extensions/question.ts` | `question` tool for multi-choice prompts |
+| **Pi** | `pi/extensions/subagent/` | `subagent` tool; discovers `pi/agents/*.md` |
+| **Pi** | `pi/prompts/*.md` | User-invoked dispatch/configure/clear templates |
+| **Pi** | `pi/agents/*.md` | Generated subagent bodies for `subagent` tool |
 
 ---
 
@@ -161,9 +184,11 @@ Reference: [`config.example.json`](config.example.json) for a full example; [`sh
 
 Guides plan writing. Filename `YYYY-MM-DD-<descriptive-name>.md`; frontmatter `title`, `created`, `last_updated`, `status`. Template: [`skills/planning/plan-template.md`](skills/planning/plan-template.md).
 
-### `plan-dispatch` (Claude, Pi)
+On opencode, use with the built-in Plan primary agent. On Pi, invoke the skill or follow `/plan-dispatch` after the plan is ready.
 
-After plan approval (Claude via hook; Pi via explicit skill invocation). Two-step choice: save only, or dispatch then pick backend.
+### `plan-dispatch` (Claude, opencode, Pi)
+
+After plan approval (Claude via hook; opencode and Pi via explicit skill or prompt). Two-step choice: save only, or dispatch then pick backend.
 
 **Opt out of dispatch prompt** (save hook still runs):
 
@@ -171,13 +196,17 @@ After plan approval (Claude via hook; Pi via explicit skill invocation). Two-ste
 export CLAUDE_NO_COMPOSER_DELEGATE=1
 ```
 
-### `implement-plan` (Cursor, opencode — explicit)
+### `implement-plan` (Claude, Cursor, opencode, Pi)
 
-Slash or explicit invocation only; **requires a plan file path** (e.g. `/implement-plan docs/plans/2026-07-09-foo.md`). Orchestrates phase extraction, parallel `plan-phase-implementer` Tasks, merge, `plan-verifier`, and a fix loop.
+Explicit invocation only; **requires a plan file path** (e.g. `/implement-plan docs/plans/2026-07-09-foo.md`). Orchestrates phase extraction, parallel implementer subagents, merge, verifier, and a fix loop. Uses `Task` on Claude/Cursor, `task` on opencode, `subagent` on Pi.
 
-### `agent-handoff` (Claude, Cursor, Pi)
+### `agent-handoff` (Claude, Cursor, opencode, Pi)
 
 Natural-language triggers for ad-hoc delegation: "hand off to agent", "delegate to composer", etc.
+
+### `configure` and `clear-plans` (explicit-only)
+
+`/configure` sets per-harness model defaults. `/clear-plans` archives or deletes old `docs/plans/` files. Both are user-invoked; opencode needs `permission.skill` denies from the example config.
 
 ---
 
@@ -203,6 +232,10 @@ If you previously installed plan-dispatch hooks globally, remove duplicates afte
 3. Keep the Bash permissions above.
 4. Restart Claude Code.
 
+### opencode: migrate from commands to skills
+
+If you installed an older release that symlinked `opencode/commands/*.md`, re-run `install-opencode.sh`. It removes stale command symlinks and links skills instead. Update any muscle memory: `/plan` → built-in Plan agent + `/planning`; `/plan-to-agents:configure` → `/configure`.
+
 ---
 
 ## Planning harness suitability (with Plannotator)
@@ -214,7 +247,7 @@ If you previously installed plan-dispatch hooks globally, remove duplicates afte
 | **Claude Code** | Yes | `/plugin install plannotator@plannotator` |
 | **opencode** | Yes | `"plugin": ["@plannotator/opencode@latest"]` in `opencode.json` |
 | **Cursor** | Partial | Plannotator skills only; no Plan Mode hook plugin yet |
-| **Pi** | Partial | Plannotator lists Pi support; use explicit `/plan` or `planning` skill for `docs/plans/` |
+| **Pi** | Partial | Plannotator lists Pi support; use `planning` skill or `/plan-dispatch` for `docs/plans/` |
 
 Any harness can **implement** an approved plan from `docs/plans/` via plan-to-agents dispatch; the table above is about where to **write and review** plans interactively.
 
@@ -242,18 +275,24 @@ No conflicts — install both independently. See the [marketplace README](../../
 
 ### Cursor
 
-- [ ] Install plugin; plan edit syncs to `docs/plans/`
+- [ ] Install plugin from git URL or Team Marketplace; plan edit syncs to `docs/plans/`
 - [ ] `implement-plan` and `agent-handoff` spawn Task subagents
+- [ ] No auto-dispatch on plan approval (explicit skills only)
 
 ### opencode
 
-- [ ] `install-opencode.sh` (one scope); `/plan`, `/plan-dispatch`, `/implement-plan` listed once
-- [ ] `/implement-plan docs/plans/<plan>.md` on a small plan → subagents + verifier
+- [ ] `install-opencode.sh` (one scope); six skills and two agents listed once
+- [ ] No `commands/` symlinks remain after reinstall
+- [ ] `/planning` with Plan agent; `/plan-dispatch` two-step flow
+- [ ] `/implement-plan docs/plans/<plan>.md` on a small plan → `task` subagents + verifier
+- [ ] `validate-install.sh` passes
 
 ### Pi
 
 - [ ] `pi install git:…@<sha>`; skills load once (no `~/.claude/skills` duplicate)
-- [ ] Small plan dispatches via RPC/`bash` adapter
+- [ ] `question` and `subagent` tools registered; `pi/agents/*.md` listed
+- [ ] `/plan-dispatch` and `/implement-plan` on a small plan
+- [ ] Project agents require confirmation when `agentScope` includes project
 
 ### Cross-harness
 

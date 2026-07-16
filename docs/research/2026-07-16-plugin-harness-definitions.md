@@ -511,3 +511,40 @@ chooses a concrete Pi subagent extension and package contract.
 * [SDK](https://pi.dev/docs/latest/sdk)
 * [RPC source documentation](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/rpc.md)
 * [Official subagent extension example](https://github.com/earendil-works/pi/tree/main/packages/coding-agent/examples/extensions/subagent)
+
+---
+
+## Implementation status addendum (2026-07-16)
+
+This section records what changed after the research above. The findings in the
+main document are preserved as the historical baseline.
+
+### Shipped since research
+
+| Area | Was (research finding) | Now |
+|------|------------------------|-----|
+| Cursor catalog | No native `.cursor-plugin/marketplace.json`; install relied on Claude compatibility | Native [`.cursor-plugin/marketplace.json`](../../.cursor-plugin/marketplace.json) ships; Claude and Cursor catalogs validated in CI |
+| OpenCode install | Commands-only symlink installer; skills not installed | [`install-opencode.sh`](../../plugins/plan-to-agents/opencode/install-opencode.sh) symlinks six skills + two agents; removes legacy `commands/` symlinks; [`validate-install.sh`](../../plugins/plan-to-agents/opencode/validate-install.sh) checks layout |
+| OpenCode configure name | `/plan-to-agents:configure` referenced in shared docs | opencode uses `/configure` skill; Claude/Cursor keep namespaced `/plan-to-agents:configure` |
+| Pi package | Skills glob only; no extensions, prompts, or agents | `package.json` declares three extensions, four prompt templates, skills glob; `emit.sh` writes `pi/agents/*.md` |
+| Pi subagent path | `implement-plan` referenced `Task`; no Pi registry | `subagent` extension + generated `pi/agents/*.md`; skills/prompts use `subagent` and `question` tools |
+| Pi shared roles claim | README implied roles load via skill glob | Documented false; roles stay in `shared/roles/`; only emitted `pi/agents/` is discovered |
+| session-handoff Pi | Skills only on Pi | `precompact-handoff.ts` blocks on `session_before_compact` (parallel intent to Claude PreCompact) |
+| CI | Marketplace validation manual | [`.github/workflows/marketplace-validate.yml`](../../.github/workflows/marketplace-validate.yml) runs `validate-marketplace.mjs` on every push/PR |
+
+### Still open (manual or follow-up)
+
+| Item | Status |
+|------|--------|
+| Cursor Team Marketplace import + Auto Refresh | Catalog file exists; Dashboard import and hook behavior after remote install need dogfood verification |
+| Cursor post-plan auto-dispatch | No proven `ExitPlanMode` equivalent; explicit `implement-plan` / `agent-handoff` only |
+| Cursor `preCompact` blocking | Observational only; session-handoff stays manual on Cursor (no hook in Cursor manifest) |
+| opencode native skills vs commands policy | Skills are the public interface; opencode still supports `commands/` in general, but this repo no longer ships them |
+| Public catalog listing | Phase 6 in [FUTURE.md](../FUTURE.md) |
+| Cloud agent automation | Phase 4 in FUTURE.md |
+
+### Doc alignment (Wave 4)
+
+Plugin READMEs, [pidev-setup.md](../pidev-setup.md), and manifest descriptions were
+updated to match the shipped tree. Use this addendum plus the live repo when the
+historical sections above disagree with current behavior.

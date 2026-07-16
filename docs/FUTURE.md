@@ -10,7 +10,7 @@ Roadmap for [joemocode-llm-plugins](../README.md). Ordered by impact and depende
 - [ ] Install on a second machine using README commands only (no manual file copies)
 - [ ] Migrate global `~/.claude` hooks/skills to the plugin; confirm `ExitPlanMode` flow end-to-end
 - [ ] Add `extraKnownMarketplaces` + `enabledPlugins` to one dogfood repo (e.g. model-marketplace) so teammates get prompted automatically
-- [ ] Document required Claude permissions (`Bash(agent:*)`) in plugin README only — keep root README install-focused
+- [x] Document required Claude permissions (`Bash(agent:*)`) in plugin README only — keep root README install-focused
 
 **Done when:** `plan-to-agents@joemocode-llm-plugins` installs and works from a clean Claude Code + Cursor setup via git only.
 
@@ -20,10 +20,8 @@ Roadmap for [joemocode-llm-plugins](../README.md). Ordered by impact and depende
 
 **Goal:** Reliable import and refresh in Cursor Dashboard → Team Marketplaces.
 
-Cursor’s indexer has been stricter than Claude Code about marketplace layout. Adjust if Team Marketplace refresh fails:
-
-- [ ] Add [`.cursor-plugin/marketplace.json`](../.claude-plugin/marketplace.json) (mirror of Claude catalog, or single shared file if both readers accept one path)
-- [ ] Try `metadata.pluginRoot: "plugins"` with bare `source: "plan-to-agents"` (no `./` prefix) per [cursor/plugins](https://github.com/cursor/plugins) convention
+- [x] Add [`.cursor-plugin/marketplace.json`](../.cursor-plugin/marketplace.json) (native Cursor catalog alongside Claude)
+- [ ] Try `metadata.pluginRoot: "plugins"` with bare `source: "plan-to-agents"` (no `./` prefix) per [cursor/plugins](https://github.com/cursor/plugins) convention if Team import fails
 - [ ] Import repo in Cursor Dashboard → Settings → Plugins → Team Marketplaces
 - [ ] Connect Cursor GitHub App + enable Auto Refresh on the marketplace repo
 - [ ] Validate `afterFileEdit` sync hook fires when installed from Team Marketplace (not just local path)
@@ -38,7 +36,7 @@ Cursor’s indexer has been stricter than Claude Code about marketplace layout. 
 
 - [ ] Spike `postToolUse` / mode-switch hooks for plan → agent transition (no proven `ExitPlanMode` equivalent yet)
 - [ ] If hook works: inject context to offer implement vs handoff (mirror Claude `plan-dispatch.sh`)
-- [ ] If hook does not work: document explicit triggers only; consider a slash command / `disable-model-invocation: false` skill alias
+- [x] If hook does not work: document explicit triggers only (see plan-to-agents README test checklist)
 - [ ] Align plan mirror paths: optional write to both `<repo>/.cursor/plans/` and `<repo>/.claude/plans/` for cross-tool repos
 
 **Done when:** Cursor users have a documented, reliable post-plan path (hook or explicit) with no ambiguity.
@@ -61,7 +59,7 @@ Cursor’s indexer has been stricter than Claude Code about marketplace layout. 
 
 **Goal:** Safe iteration on marketplace structure.
 
-- [ ] GitHub Action: `node scripts/validate-marketplace.mjs` on every PR
+- [x] GitHub Action: `node scripts/validate-marketplace.mjs` on every PR
 - [ ] Bump `version` in plugin manifests + marketplace entry on each release (pinned updates for users)
 - [ ] Optional: changelog per plugin under `plugins/<name>/CHANGELOG.md`
 - [ ] Tag releases (`v0.1.0`) when sharing outside personal machines
@@ -98,9 +96,21 @@ Candidates (add to `marketplace.json` + `plugins/<name>/`):
 
 ---
 
+## Completed cross-harness work (reference)
+
+These shipped on `main` and are documented in plugin READMEs and
+[research/2026-07-16-plugin-harness-definitions.md](./research/2026-07-16-plugin-harness-definitions.md)
+(addendum):
+
+- OpenCode skills-only installer with permission config and legacy command cleanup
+- Pi extensions (`question`, `subagent`, compaction guard), prompt templates, and `pi/agents/` emit target
+- Native Cursor marketplace catalog + validator tests
+
+---
+
 ## Non-goals (for now)
 
-- Replacing Plannotator’s interactive review UI
+- Replacing Plannotator's interactive review UI
 - Supporting registry-published plugin sources (git-only is fine for personal sharing)
 - Bundling repo-specific lint/test commands inside generic implementer agents
 
