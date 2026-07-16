@@ -1,0 +1,15 @@
+name: Marketplace validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  marketplace-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate marketplace catalogs and plugin manifests
+        run: node scripts/validate-marketplace.mjs
+      - name: Run marketplace validator tests
+        run: node --test scripts/validate-marketplace.test.mjs

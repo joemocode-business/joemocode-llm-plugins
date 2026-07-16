@@ -1,0 +1,20 @@
+{
+  "name": "joemocode-llm-plugins",
+  "owner": { "name": "Joe Muoio" },
+  "metadata": {
+    "description": "LLM agent plugins for Claude Code and Cursor",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "plan-to-agents",
+      "source": "./plugins/plan-to-agents",
+      "description": "Post-plan agent delegation: Claude→Cursor CLI, Cursor→Task subagents"
+    },
+    {
+      "name": "session-handoff",
+      "source": "./plugins/session-handoff",
+      "description": "PreCompact hook + research/agent-prompt handoff artifacts: at compaction time, finish the request or capture the session for a fresh agent"
+    }
+  ]
+}
