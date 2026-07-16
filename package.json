@@ -2,6 +2,18 @@
   "name": "joemocode-llm-plugins",
   "keywords": ["pi-package"],
   "pi": {
-    "skills": ["./plugins/*/skills/*"]
+    "skills": ["./plugins/*/skills/*"],
+    "extensions": [
+      "./plugins/plan-to-agents/pi/extensions/subagent/index.ts",
+      "./plugins/plan-to-agents/pi/extensions/question.ts"
+    ],
+    "prompts": ["./plugins/plan-to-agents/pi/prompts"]
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-agent-core": "*",
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*",
+    "typebox": "^0.34.0"
   }
 }
