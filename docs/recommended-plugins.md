@@ -17,22 +17,25 @@ You already own most of the plan/implement half in this repo.
 | Plan | [Plannotator](https://github.com/backnotprop/plannotator) (interactive review) + [plan-to-agents](../plugins/plan-to-agents/README.md) | in repo |
 | Implement | [plan-to-agents](../plugins/plan-to-agents/README.md) (two-step dispatch to Claude / Cursor / opencode / Pi) | in repo |
 
-## plan-to-agents — opencode
+## plan-to-agents: opencode
 
-For opencode as planner or doer, install markdown agents and commands via the
-symlink installer (opencode's npm `"plugin"` array cannot ship agents/commands):
+For opencode as planner or doer, install Agent Skills and generated subagents
+with the symlink installer:
 
 ```bash
 bash plugins/plan-to-agents/opencode/install-opencode.sh          # project → .opencode/
 bash plugins/plan-to-agents/opencode/install-opencode.sh --global   # global → ~/.config/opencode/
 ```
 
-Use **one** scope only. Commands: `/plan`, `/plan-dispatch`, `/implement-plan`,
-`/agent-handoff`. opencode-as-doer uses native `Task` subagents; headless target
-from another harness: `opencode run -m <model>`. Details:
-[pidev-setup.md § plan-to-agents — opencode](./pidev-setup.md#plan-to-agents--opencode).
+Use one scope only. Switch to opencode's Plan agent and run `/planning` to draft
+a plan. Other skill entry points include `/plan-dispatch`, `/implement-plan`,
+`/configure`, `/agent-handoff`, and `/clear-plans`. OpenCode uses its native
+`task` tool for subagents. A different runtime can target it with
+`opencode run -m <model>`. Merge the supplied `opencode.json.example`
+permissions to keep explicit-only skills out of model auto-invocation. Details:
+[pidev-setup.md, plan-to-agents: opencode](./pidev-setup.md#plan-to-agents--opencode).
 
-## plan-to-agents — Pi
+## plan-to-agents: Pi
 
 Install this repo as a Pi package (pinned ref):
 
@@ -40,9 +43,13 @@ Install this repo as a Pi package (pinned ref):
 pi install git:github.com/joemocode-business/joemocode-llm-plugins@<sha-or-tag>
 ```
 
-Do **not** also symlink the same skills into `~/.claude/skills` — that
-double-loads. Pi-as-doer: `pi --mode rpc` or `bash`-to-agent per subtask.
-Details: [pidev-setup.md § plan-to-agents — Pi](./pidev-setup.md#plan-to-agents--pi).
+Do not also symlink the same skills into `~/.claude/skills`; that loads duplicate
+definitions. The package installs skills, Pi prompt templates, generated agents,
+and TypeScript extensions that provide `subagent`, `question`, and the
+pre-compaction handoff guard. Another runtime can target Pi with RPC or print
+mode. Pi extensions run with the user's permissions, so review and pin the
+installed commit. Details:
+[pidev-setup.md, plan-to-agents: Pi](./pidev-setup.md#plan-to-agents--pi).
 
 ### Honest note on the Pi package gallery
 
