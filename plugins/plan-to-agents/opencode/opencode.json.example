@@ -1,0 +1,16 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "skill": {
+      "*": "allow",
+      "implement-plan": "deny",
+      "configure": "deny",
+      "clear-plans": "deny"
+    },
+    "task": {
+      "*": "allow",
+      "plan-phase-implementer": "allow",
+      "plan-verifier": "allow"
+    }
+  }
+}
