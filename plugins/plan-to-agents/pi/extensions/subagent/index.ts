@@ -6,7 +6,7 @@
  * Pinned: main @ 2026-07-16 (832dcc7423ddd6185655c3455e7b6bf1af6ce9c6)
  *
  * Extensions for plan-to-agents:
- * - Always discovers package-local agents from ../agents (emit.sh output).
+ * - Always discovers package-local agents from ../../agents (emit.sh output).
  * - Project-local agents require agentScope "project" or "both" and confirmation.
  */
 
@@ -36,7 +36,7 @@ const MAX_PARALLEL_TASKS = 8;
 const MAX_CONCURRENCY = 4;
 const PER_TASK_OUTPUT_CAP = 50 * 1024;
 
-const PACKAGE_AGENTS_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "agents");
+const PACKAGE_AGENTS_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "agents");
 
 interface UsageStats {
 	input: number;

@@ -8,7 +8,7 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { CONFIG_DIR_NAME, getAgentDir, parseFrontmatter } from "@earendil-works/pi-coding-agent";
+import { getAgentDir, parseFrontmatter } from "@earendil-works/pi-coding-agent";
 
 export type AgentScope = "user" | "project" | "both";
 export type AgentSource = "user" | "project" | "package";
@@ -91,7 +91,7 @@ function isDirectory(p: string): boolean {
 function findNearestProjectAgentsDir(cwd: string): string | null {
 	let currentDir = cwd;
 	while (true) {
-		const candidate = path.join(currentDir, CONFIG_DIR_NAME, "agents");
+		const candidate = path.join(currentDir, ".pi", "agents");
 		if (isDirectory(candidate)) return candidate;
 
 		const parentDir = path.dirname(currentDir);
