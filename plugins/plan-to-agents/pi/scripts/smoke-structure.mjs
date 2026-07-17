@@ -66,7 +66,7 @@ function checkPrompts() {
 		const filePath = path.join(promptsDir, name);
 		if (!assertExists(filePath, `prompt ${name}`)) continue;
 		const text = fs.readFileSync(filePath, "utf8");
-		if (!/\*\*subagent\*\*/.test(text) && !/subagent/.test(text)) {
+		if (!/subagent/.test(text)) {
 			// configure/clear-plans use question only
 			if (name === "implement-plan.md" || name === "plan-dispatch.md") {
 				fail(`${name} should reference subagent tool`);
