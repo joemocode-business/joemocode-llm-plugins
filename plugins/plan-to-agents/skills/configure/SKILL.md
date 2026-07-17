@@ -14,7 +14,7 @@ metadata:
 |---------|----------------|------------|
 | Claude Code | `AskUserQuestion` | `/plan-to-agents:configure` skill |
 | Cursor | `AskUserQuestion` | `/plan-to-agents:configure` skill |
-| opencode | `question` | `/configure` skill (explicit-only; `metadata.opencode/autoinvoke: false`) |
+| opencode | `question` | `/configure` skill (explicit-only via `permission.skill` denies in merged `opencode.json`; frontmatter honored on Claude Code / Cursor only) |
 | Pi | `question` | `/configure` prompt |
 
 Set up or update per-harness model defaults for plan-to-agents dispatch. Records which harnesses

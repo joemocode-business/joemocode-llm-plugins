@@ -11,7 +11,7 @@ disable-model-invocation: false
 | Harness | Plan authoring | Post-approval dispatch |
 |---------|----------------|------------------------|
 | Claude Code | Plan Mode + this skill | `plan-dispatch` skill (via `ExitPlanMode` hook) |
-| Cursor | Plan Mode + this skill | `plan-dispatch` skill (via `afterFileEdit` hook) |
+| Cursor | Plan Mode + this skill | `plan-dispatch` skill invoked manually (`afterFileEdit` hook only mirrors the plan into `docs/plans/`) |
 | opencode | Built-in Plan agent + `/planning` skill | `/plan-dispatch` skill |
 | Pi | This skill + `/planning` if needed | `/plan-dispatch` prompt |
 
