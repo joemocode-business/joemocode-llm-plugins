@@ -27,7 +27,7 @@ If no such file exists (e.g. invoked manually outside the hook flow), summarize 
 
 ## What to do
 
-1. **Ask** — call `AskUserQuestion` with exactly these three options:
+1. **Ask** — ask the user — `AskUserQuestion` on Claude Code / Cursor, the `question` tool on Pi — with exactly these three options:
 
    - **Finish the request** — do nothing; keep working. (On Claude Code, the next
      compaction will proceed normally — the hook's loop guard won't block again this
