@@ -507,10 +507,12 @@ export default function (pi: ExtensionAPI) {
 					};
 				}
 
+				const finished = new Array(params.tasks.length).fill(false);
+
 				const emitParallelUpdate = () => {
 					if (!onUpdate) return;
-					const running = allResults.filter((r) => r.exitCode === -1).length;
-					const done = allResults.filter((r) => r.exitCode !== -1).length;
+					const done = finished.filter(Boolean).length;
+					const running = allResults.length - done;
 					onUpdate({
 						content: [
 							{ type: "text", text: `Parallel: ${done}/${allResults.length} done, ${running} running...` },
@@ -537,6 +539,7 @@ export default function (pi: ExtensionAPI) {
 						makeDetails("parallel"),
 					);
 					allResults[index] = result;
+					finished[index] = true;
 					emitParallelUpdate();
 					return result;
 				});

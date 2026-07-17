@@ -9,6 +9,9 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { getAgentDir, parseFrontmatter } from "@earendil-works/pi-coding-agent";
+import { formatAgentList, mergeAgents } from "./agents-pure.mjs";
+
+export { formatAgentList, mergeAgents };
 
 export type AgentScope = "user" | "project" | "both";
 export type AgentSource = "user" | "project" | "package";
@@ -100,18 +103,6 @@ function findNearestProjectAgentsDir(cwd: string): string | null {
 	}
 }
 
-export function mergeAgents(
-	userAgents: AgentConfig[],
-	packageAgents: AgentConfig[],
-	projectAgents: AgentConfig[],
-): AgentConfig[] {
-	const agentMap = new Map<string, AgentConfig>();
-	for (const agent of userAgents) agentMap.set(agent.name, agent);
-	for (const agent of packageAgents) agentMap.set(agent.name, agent);
-	for (const agent of projectAgents) agentMap.set(agent.name, agent);
-	return Array.from(agentMap.values());
-}
-
 export function discoverAgents(
 	cwd: string,
 	scope: AgentScope,
@@ -132,15 +123,3 @@ export function discoverAgents(
 	};
 }
 
-export function formatAgentList(
-	agents: AgentConfig[],
-	maxItems: number,
-): { text: string; remaining: number } {
-	if (agents.length === 0) return { text: "none", remaining: 0 };
-	const listed = agents.slice(0, maxItems);
-	const remaining = agents.length - listed.length;
-	return {
-		text: listed.map((a) => `${a.name} (${a.source}): ${a.description}`).join("; "),
-		remaining,
-	};
-}
