@@ -116,9 +116,11 @@ link_skills() {
 
 link_markdown() {
   local src_dir=$1 dest_dir=$2 file
+  shopt -s nullglob
   for file in $(cd "$src_dir" && printf '%s\n' *.md | LC_ALL=C sort); do
     ln -sf "$src_dir/$file" "$dest_dir/$file"
   done
+  shopt -u nullglob
 }
 
 link_shared() {

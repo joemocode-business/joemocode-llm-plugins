@@ -104,6 +104,26 @@ test("fails when Cursor catalog is missing", () => {
   assert.match(result.errors.join("\n"), /missing file:.*\.cursor-plugin\/marketplace\.json/);
 });
 
+test("fails on bad plugin manifest when Cursor catalog is absent", () => {
+  const root = mkdtempSync(join(tmpdir(), "marketplace-fixture-"));
+  writeFixture(root, {
+    ".claude-plugin/marketplace.json": {
+      ...baseCatalog,
+      plugins: [baseCatalog.plugins[0]],
+    },
+    "plugins/plan-to-agents/.claude-plugin/plugin.json": {
+      ...planManifests[".claude-plugin/plugin.json"],
+      name: "wrong-name",
+    },
+  });
+  mkdirSync(join(root, "plugins/plan-to-agents/hooks"), { recursive: true });
+  writeFileSync(join(root, "plugins/plan-to-agents/hooks/hooks.json"), "{}", "utf8");
+
+  const result = validateMarketplace(root);
+  assert.equal(result.ok, false);
+  assert.match(result.errors.join("\n"), /does not match marketplace entry 'plan-to-agents'/);
+});
+
 test("fails when Cursor catalog includes Claude-only strict field", () => {
   const root = mkdtempSync(join(tmpdir(), "marketplace-fixture-"));
   writeValidPluginTree(root);
