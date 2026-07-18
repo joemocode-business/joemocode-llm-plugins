@@ -8,6 +8,7 @@
  * Extensions for plan-to-agents:
  * - Always discovers package-local agents from ../../agents (emit.sh output).
  * - Project-local agents require agentScope "project" or "both" and confirmation.
+ * - Local bug fixes vs upstream: chain replacer preserves `$` in previous output; abort listener removed on settle.
  */
 
 import { spawn } from "node:child_process";
@@ -281,17 +282,9 @@ async function runSingleAgent(
 				currentResult.stderr += data.toString();
 			});
 
-			proc.on("close", (code) => {
-				if (buffer.trim()) processLine(buffer);
-				resolve(code ?? 0);
-			});
-
-			proc.on("error", () => {
-				resolve(1);
-			});
-
+			let killProc: (() => void) | undefined;
 			if (signal) {
-				const killProc = () => {
+				killProc = () => {
 					wasAborted = true;
 					proc.kill("SIGTERM");
 					setTimeout(() => {
@@ -301,6 +294,17 @@ async function runSingleAgent(
 				if (signal.aborted) killProc();
 				else signal.addEventListener("abort", killProc, { once: true });
 			}
+
+			proc.on("close", (code) => {
+				if (buffer.trim()) processLine(buffer);
+				if (killProc) signal?.removeEventListener("abort", killProc);
+				resolve(code ?? 0);
+			});
+
+			proc.on("error", () => {
+				if (killProc) signal?.removeEventListener("abort", killProc);
+				resolve(1);
+			});
 		});
 
 		currentResult.exitCode = exitCode;
@@ -441,7 +445,7 @@ export default function (pi: ExtensionAPI) {
 
 				for (let i = 0; i < params.chain.length; i++) {
 					const step = params.chain[i];
-					const taskWithContext = step.task.replace(/\{previous\}/g, previousOutput);
+					const taskWithContext = step.task.replace(/\{previous\}/g, () => previousOutput);
 					const result = await runSingleAgent(
 						ctx.cwd,
 						agents,
