@@ -2,9 +2,25 @@
 
 Set up or update per-harness model defaults for plan-to-agents dispatch. Records which harnesses you use and the default model for each, so dispatch never has to ask or probe.
 
-User-level config path: `${XDG_CONFIG_HOME:-$HOME/.config}/plan-to-agents/config.json`. Editing the in-repo `.plan-to-agents.json` override is a documented manual path (see `plugins/plan-to-agents/shared/model-resolution.md`), not this flow.
+User-level config path: `${XDG_CONFIG_HOME:-$HOME/.config}/plan-to-agents/config.json`. A repo-root `.plan-to-agents.json` can override this file field-by-field at dispatch time (not edited here).
 
-Schema shape: see `plugins/plan-to-agents/config.example.json` (`version`, `enabled_harnesses`, `harnesses.<slug>.default_model`, `harnesses.<slug>.models`).
+**Schema** — `version` (number), `enabled_harnesses` (array of canonical slugs), `harnesses.<slug>.default_model` (non-empty string or `null`), `harnesses.<slug>.models` (array of strings). Canonical slugs: `claude-code`, `cursor`, `opencode`, `pi`.
+
+```json
+{
+  "version": 1,
+  "enabled_harnesses": ["opencode", "claude-code"],
+  "harnesses": {
+    "claude-code": { "default_model": "claude-opus-4-8", "models": [] },
+    "cursor":      { "default_model": "composer-2.5",   "models": [] },
+    "opencode": {
+      "default_model": "vllm/Qwen/Qwen3-Coder-30B-A3B-Instruct",
+      "models": ["vllm/Qwen/Qwen3-Coder-30B-A3B-Instruct", "anthropic/claude-sonnet-5"]
+    },
+    "pi": { "default_model": null, "models": [] }
+  }
+}
+```
 
 ## 1. Load and show current config
 
@@ -38,12 +54,21 @@ For each selected harness, call **`question`** to ask for its `default_model` (k
 
 Optionally collect extra model ids for the `models` choose-from list. Do **not** probe the harness to enumerate models — ask the user.
 
-## 4. Write config
+## 4. Write and validate config
 
 `mkdir -p` the config directory, then write `${XDG_CONFIG_HOME:-$HOME/.config}/plan-to-agents/config.json`, merging onto any existing config rather than clobbering unrelated fields. Confirm the path to the user.
 
-Run `plugins/plan-to-agents/shared/validate-config.sh` on the written file. If validation fails, surface the error output to the user and do not treat the config as saved until it passes.
+Validate the written JSON yourself before treating it as saved:
+
+- Valid JSON
+- `version` is a number (if present)
+- `enabled_harnesses` is an array containing only canonical slugs (`claude-code`, `cursor`, `opencode`, `pi`) with no unknown or duplicate slugs
+- `harnesses` is an object keyed only by canonical slugs
+- Each present harness's `default_model` is a non-empty string or `null`
+- Each present `models` is an array of strings
+
+If validation fails, surface the errors to the user and do not treat the config as saved until it passes.
 
 ## 5. Report
 
-Show the resulting config, note that it was validated successfully, and explain how dispatch will use it (see `plugins/plan-to-agents/shared/model-resolution.md`).
+Show the resulting config, note that it was validated successfully, and explain how dispatch will use it: repo-root `.plan-to-agents.json` overrides this file field-by-field; if neither exists, dispatch asks the user.

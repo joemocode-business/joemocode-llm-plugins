@@ -15,7 +15,7 @@ Extract phases (`##` sections or `### Phase N`), tasks, target files, acceptance
 | Small | ≤2 phases AND ≤6 tasks | One `plan-phase-implementer` subagent with the full plan |
 | Large | 3+ phases OR 7+ tasks | Multiple `plan-phase-implementer` subagents — one per independent phase group |
 
-Parallelize groups that touch different files. Follow `plugins/plan-to-agents/shared/orchestration-pattern.md` — each subagent works in its own branch/worktree off `base=$(git rev-parse --abbrev-ref HEAD)` and commits there.
+Parallelize groups that touch different files. Each subagent works on its own branch off `base=$(git rev-parse --abbrev-ref HEAD)` and commits there.
 
 ## 3. Spawn implementers
 
