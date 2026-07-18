@@ -116,6 +116,10 @@ link_skills() {
 
 link_markdown() {
   local src_dir=$1 dest_dir=$2 file
+  if [ ! -d "$src_dir" ]; then
+    echo "install-opencode.sh: missing agents source directory '$src_dir' (run shared/emit.sh)" >&2
+    exit 1
+  fi
   shopt -s nullglob
   for file in $(cd "$src_dir" && printf '%s\n' *.md | LC_ALL=C sort); do
     ln -sf "$src_dir/$file" "$dest_dir/$file"
