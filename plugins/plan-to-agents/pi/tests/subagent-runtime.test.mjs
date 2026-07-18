@@ -32,8 +32,7 @@ async function loadPiCodingAgent() {
 	}
 }
 
-async function main() {
-	const sandbox = fs.mkdtempSync(path.join(path.dirname(PI_ROOT), "pi-subagent-test-"));
+async function main(sandbox) {
 	const { discoverAndLoadExtensions, createEventBus } = await loadPiCodingAgent();
 
 	const { extensions, errors } = await discoverAndLoadExtensions(
@@ -191,6 +190,11 @@ body
 	}
 }
 
-main().catch((e) => {
-	fail(e.message);
-});
+const sandbox = fs.mkdtempSync(path.join(path.dirname(PI_ROOT), "pi-subagent-test-"));
+main(sandbox)
+	.catch((e) => {
+		fail(e.message);
+	})
+	.finally(() => {
+		if (sandbox) fs.rmSync(sandbox, { recursive: true, force: true });
+	});
