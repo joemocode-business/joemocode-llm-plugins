@@ -105,7 +105,26 @@ async function main() {
 	assert.equal(parallel.details?.mode, "parallel");
 	assert.equal(parallel.details?.results?.length, 2);
 	assert.match(parallel.content?.[0]?.text ?? "", /Parallel: 0\/2 succeeded/);
+	assert.equal(parallel.isError, true);
 	console.log("ok: parallel mode passes discovery");
+
+	// Parallel mode: partial failure still marks the batch as error
+	const parallelMixed = await execute(
+		"tc-parallel-mixed",
+		{
+			tasks: [
+				{ agent: "plan-phase-implementer", task: "noop", cwd: path.join(sandbox, "nonexistent-cwd") },
+				{ agent: "nonexistent-b", task: "t2" },
+			],
+		},
+		new AbortController().signal,
+		undefined,
+		ctx,
+	);
+	assert.equal(parallelMixed.details?.mode, "parallel");
+	assert.equal(parallelMixed.details?.results?.length, 2);
+	assert.equal(parallelMixed.isError, true);
+	console.log("ok: parallel mode sets isError when any task fails");
 
 	// Optional: aborted spawn for a real package agent (no credentials required)
 	const abortController = new AbortController();
