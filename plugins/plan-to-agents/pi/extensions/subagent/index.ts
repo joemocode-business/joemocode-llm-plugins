@@ -561,6 +561,7 @@ export default function (pi: ExtensionAPI) {
 						},
 					],
 					details: makeDetails("parallel")(results),
+					isError: successCount < results.length,
 				};
 			}
 
