@@ -2,8 +2,6 @@
 name: configure
 description: Set up or update per-harness model defaults for plan-to-agents dispatch. Records which harnesses you use (Claude Code, Cursor, opencode, Pi) and the default model for each, so dispatch never has to ask or probe. User-invoked.
 disable-model-invocation: true
-metadata:
-  opencode/autoinvoke: "false"
 ---
 
 # Configure
