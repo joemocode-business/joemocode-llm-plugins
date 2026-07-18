@@ -56,7 +56,15 @@ Optionally collect extra model ids for the `models` choose-from list. Do **not**
 
 ## 4. Write and validate config
 
-`mkdir -p` the config directory, then write `${XDG_CONFIG_HOME:-$HOME/.config}/plan-to-agents/config.json`, merging onto any existing config rather than clobbering unrelated fields. Confirm the path to the user.
+`mkdir -p` the config directory, then write `${XDG_CONFIG_HOME:-$HOME/.config}/plan-to-agents/config.json`. Treat the config loaded in step 1 as the merge base:
+
+- Replace `enabled_harnesses` with the canonical slugs selected in step 2.
+- Preserve unrelated top-level fields.
+- Merge the `harnesses` map per canonical slug. Keep entries for harnesses the user did not edit, including harnesses that are no longer enabled.
+- For each edited `harnesses.<slug>` entry, merge per field. Replace only the `default_model` and `models` fields collected in step 3, and preserve any other existing fields.
+- Replace arrays as complete values; do not concatenate old and new `enabled_harnesses` or `models` arrays.
+
+Do not replace the whole `harnesses` object with only the selected harnesses. Confirm the written path to the user.
 
 Validate the written JSON yourself before treating it as saved:
 
@@ -71,4 +79,4 @@ If validation fails, surface the errors to the user and do not treat the config 
 
 ## 5. Report
 
-Show the resulting config, note that it was validated successfully, and explain how dispatch will use it: repo-root `.plan-to-agents.json` overrides this file field-by-field; if neither exists, dispatch asks the user.
+Show the resulting config, note that it was validated successfully, and explain how dispatch will use it: top-level fields from the repo-root `.plan-to-agents.json` override this file, while the `harnesses` map merges per canonical slug and per field. If neither config exists, dispatch asks the user.
