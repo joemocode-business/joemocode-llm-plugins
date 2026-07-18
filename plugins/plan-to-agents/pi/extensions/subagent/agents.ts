@@ -4,6 +4,7 @@
  * Upstream reference: pi-coding-agent/examples/extensions/subagent/agents.ts
  * @see https://github.com/earendil-works/pi/tree/main/packages/coding-agent/examples/extensions/subagent/agents.ts
  * Pinned: main @ 2026-07-16 (c41ef579c5da50c459e8236250bb1ede29be31da)
+ * - LOCAL: defensive tools parsing accepts YAML list or comma-separated string (upstream string-only).
  */
 
 import * as fs from "node:fs";
@@ -64,10 +65,16 @@ function loadAgentsFromDir(dir: string, source: AgentSource): AgentConfig[] {
 			continue;
 		}
 
-		const tools = frontmatter.tools
-			?.split(",")
-			.map((t: string) => t.trim())
-			.filter(Boolean);
+		const rawTools = frontmatter.tools as unknown;
+		let tools: string[] | undefined;
+		if (typeof rawTools === "string") {
+			tools = rawTools
+				.split(",")
+				.map((t) => t.trim())
+				.filter(Boolean);
+		} else if (Array.isArray(rawTools)) {
+			tools = rawTools.map((t) => String(t).trim()).filter(Boolean);
+		}
 
 		agents.push({
 			name: frontmatter.name,
