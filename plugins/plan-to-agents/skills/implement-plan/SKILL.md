@@ -2,8 +2,6 @@
 name: implement-plan
 description: Implement a plan file by orchestrating parallel subagents per phase, then verifying acceptance criteria. Use when the user provides a plan file path (e.g. docs/plans/YYYY-MM-DD-name.md) or names a specific plan to implement. Requires an explicit plan path — do not run without one.
 disable-model-invocation: true
-metadata:
-  opencode/autoinvoke: "false"
 ---
 # Implement Plan
 

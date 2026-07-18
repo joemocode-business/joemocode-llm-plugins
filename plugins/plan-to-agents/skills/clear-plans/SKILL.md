@@ -2,8 +2,6 @@
 name: clear-plans
 description: Clear out old plan files from the repo's docs/plans/ directory. Lists existing plans, lets the user pick which to remove, then archives them to docs/archive/plans/ or deletes them — always confirming first. User-invoked cleanup.
 disable-model-invocation: true
-metadata:
-  opencode/autoinvoke: "false"
 ---
 
 # Clear plans
