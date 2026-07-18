@@ -75,6 +75,43 @@ async function main() {
 	assert.equal(invalidMode.details?.packageAgentsDir, PACKAGE_AGENTS_DIR);
 	console.log("ok: PACKAGE_AGENTS_DIR resolves to pi/agents");
 
+	// YAML list-style tools in project agent frontmatter must not abort discovery
+	const projectAgentsDir = path.join(sandbox, ".pi", "agents");
+	fs.mkdirSync(projectAgentsDir, { recursive: true });
+	fs.writeFileSync(
+		path.join(projectAgentsDir, "yaml-tools-agent.md"),
+		`---
+name: yaml-tools-agent
+description: agent with list-style tools
+tools:
+  - read
+  - bash
+---
+body
+`,
+		"utf-8",
+	);
+
+	let yamlToolsDiscovery;
+	try {
+		yamlToolsDiscovery = await execute(
+			"tc-yaml-tools",
+			{ agentScope: "both" },
+			new AbortController().signal,
+			undefined,
+			ctx,
+		);
+	} catch (e) {
+		fail(`execute threw during discovery with YAML list tools: ${e.message}`);
+		return;
+	}
+
+	const yamlToolsText = yamlToolsDiscovery.content?.[0]?.text ?? "";
+	assert.match(yamlToolsText, /Invalid parameters/);
+	assert.match(yamlToolsText, /yaml-tools-agent/);
+	assert.match(yamlToolsText, /plan-phase-implementer/);
+	console.log("ok: YAML list-style tools frontmatter does not abort discovery");
+
 	// Single mode: past discovery (unknown agent lists package agents, no ctx.cwd TypeError)
 	const single = await execute(
 		"tc-single",
