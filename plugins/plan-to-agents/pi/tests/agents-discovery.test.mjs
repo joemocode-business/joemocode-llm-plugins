@@ -2,14 +2,7 @@
  * Pure helper tests for agent merge precedence (no Pi runtime).
  */
 import assert from "node:assert/strict";
-
-function mergeAgents(userAgents, packageAgents, projectAgents) {
-	const agentMap = new Map();
-	for (const agent of userAgents) agentMap.set(agent.name, agent);
-	for (const agent of packageAgents) agentMap.set(agent.name, agent);
-	for (const agent of projectAgents) agentMap.set(agent.name, agent);
-	return Array.from(agentMap.values());
-}
+import { mergeAgents } from "../extensions/subagent/agents-pure.mjs";
 
 const user = [{ name: "scout", source: "user" }];
 const pkg = [{ name: "plan-phase-implementer", source: "package" }];

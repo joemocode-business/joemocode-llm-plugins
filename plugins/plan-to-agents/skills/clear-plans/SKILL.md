@@ -2,8 +2,6 @@
 name: clear-plans
 description: Clear out old plan files from the repo's docs/plans/ directory. Lists existing plans, lets the user pick which to remove, then archives them to docs/archive/plans/ or deletes them — always confirming first. User-invoked cleanup.
 disable-model-invocation: true
-metadata:
-  opencode/autoinvoke: "false"
 ---
 
 # Clear plans
@@ -14,7 +12,7 @@ metadata:
 |---------|----------------|------------|
 | Claude Code | `AskUserQuestion` | `/plan-to-agents:clear-plans` skill |
 | Cursor | `AskUserQuestion` | `/plan-to-agents:clear-plans` skill |
-| opencode | `question` | `/clear-plans` skill (explicit-only; `metadata.opencode/autoinvoke: false`) |
+| opencode | `question` | `/clear-plans` skill (explicit-only via `permission.skill` denies in merged `opencode.json`; frontmatter honored on Claude Code / Cursor only) |
 | Pi | `question` | `/clear-plans` prompt |
 
 Clear out old plan files from the repo's canonical `<CWD>/docs/plans/` directory. List the plans,

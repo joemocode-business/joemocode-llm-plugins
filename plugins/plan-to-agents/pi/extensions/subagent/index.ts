@@ -8,6 +8,7 @@
  * Extensions for plan-to-agents:
  * - Always discovers package-local agents from ../../agents (emit.sh output).
  * - Project-local agents require agentScope "project" or "both" and confirmation.
+ * - Local bug fixes vs upstream: chain replacer preserves `$` in previous output; abort listener removed on settle.
  */
 
 import { spawn } from "node:child_process";
@@ -281,17 +282,9 @@ async function runSingleAgent(
 				currentResult.stderr += data.toString();
 			});
 
-			proc.on("close", (code) => {
-				if (buffer.trim()) processLine(buffer);
-				resolve(code ?? 0);
-			});
-
-			proc.on("error", () => {
-				resolve(1);
-			});
-
+			let killProc: (() => void) | undefined;
 			if (signal) {
-				const killProc = () => {
+				killProc = () => {
 					wasAborted = true;
 					proc.kill("SIGTERM");
 					setTimeout(() => {
@@ -301,6 +294,17 @@ async function runSingleAgent(
 				if (signal.aborted) killProc();
 				else signal.addEventListener("abort", killProc, { once: true });
 			}
+
+			proc.on("close", (code) => {
+				if (buffer.trim()) processLine(buffer);
+				if (killProc) signal?.removeEventListener("abort", killProc);
+				resolve(code ?? 0);
+			});
+
+			proc.on("error", () => {
+				if (killProc) signal?.removeEventListener("abort", killProc);
+				resolve(1);
+			});
 		});
 
 		currentResult.exitCode = exitCode;
@@ -441,7 +445,7 @@ export default function (pi: ExtensionAPI) {
 
 				for (let i = 0; i < params.chain.length; i++) {
 					const step = params.chain[i];
-					const taskWithContext = step.task.replace(/\{previous\}/g, previousOutput);
+					const taskWithContext = step.task.replace(/\{previous\}/g, () => previousOutput);
 					const result = await runSingleAgent(
 						ctx.cwd,
 						agents,
@@ -507,10 +511,12 @@ export default function (pi: ExtensionAPI) {
 					};
 				}
 
+				const finished = new Array(params.tasks.length).fill(false);
+
 				const emitParallelUpdate = () => {
 					if (!onUpdate) return;
-					const running = allResults.filter((r) => r.exitCode === -1).length;
-					const done = allResults.filter((r) => r.exitCode !== -1).length;
+					const done = finished.filter(Boolean).length;
+					const running = allResults.length - done;
 					onUpdate({
 						content: [
 							{ type: "text", text: `Parallel: ${done}/${allResults.length} done, ${running} running...` },
@@ -537,6 +543,7 @@ export default function (pi: ExtensionAPI) {
 						makeDetails("parallel"),
 					);
 					allResults[index] = result;
+					finished[index] = true;
 					emitParallelUpdate();
 					return result;
 				});
@@ -558,6 +565,7 @@ export default function (pi: ExtensionAPI) {
 						},
 					],
 					details: makeDetails("parallel")(results),
+					isError: successCount < results.length,
 				};
 			}
 

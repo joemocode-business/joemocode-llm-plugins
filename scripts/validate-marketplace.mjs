@@ -195,10 +195,6 @@ function validateCatalogParity(claudeMarketplace, cursorMarketplace, root, error
       );
     }
   }
-
-  for (const [index, plugin] of claudeMarketplace.plugins.entries()) {
-    validatePluginEntry(plugin, `plugins[${index}]`, root, errors);
-  }
 }
 
 export function validateMarketplace(root = DEFAULT_ROOT) {
@@ -211,6 +207,12 @@ export function validateMarketplace(root = DEFAULT_ROOT) {
 
   if (claudeMarketplace) {
     validateMarketplaceShape(claudeMarketplace, CLAUDE_MARKETPLACE_REL, errors);
+  }
+
+  if (claudeMarketplace?.plugins) {
+    for (const [index, plugin] of claudeMarketplace.plugins.entries()) {
+      validatePluginEntry(plugin, `plugins[${index}]`, root, errors);
+    }
   }
 
   if (cursorMarketplace) {

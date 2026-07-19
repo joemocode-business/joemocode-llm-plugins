@@ -32,8 +32,7 @@ async function loadPiCodingAgent() {
 	}
 }
 
-async function main() {
-	const sandbox = fs.mkdtempSync(path.join(path.dirname(PI_ROOT), "pi-subagent-test-"));
+async function main(sandbox) {
 	const { discoverAndLoadExtensions, createEventBus } = await loadPiCodingAgent();
 
 	const { extensions, errors } = await discoverAndLoadExtensions(
@@ -75,6 +74,43 @@ async function main() {
 	assert.equal(invalidMode.details?.packageAgentsDir, PACKAGE_AGENTS_DIR);
 	console.log("ok: PACKAGE_AGENTS_DIR resolves to pi/agents");
 
+	// YAML list-style tools in project agent frontmatter must not abort discovery
+	const projectAgentsDir = path.join(sandbox, ".pi", "agents");
+	fs.mkdirSync(projectAgentsDir, { recursive: true });
+	fs.writeFileSync(
+		path.join(projectAgentsDir, "yaml-tools-agent.md"),
+		`---
+name: yaml-tools-agent
+description: agent with list-style tools
+tools:
+  - read
+  - bash
+---
+body
+`,
+		"utf-8",
+	);
+
+	let yamlToolsDiscovery;
+	try {
+		yamlToolsDiscovery = await execute(
+			"tc-yaml-tools",
+			{ agentScope: "both" },
+			new AbortController().signal,
+			undefined,
+			ctx,
+		);
+	} catch (e) {
+		fail(`execute threw during discovery with YAML list tools: ${e.message}`);
+		return;
+	}
+
+	const yamlToolsText = yamlToolsDiscovery.content?.[0]?.text ?? "";
+	assert.match(yamlToolsText, /Invalid parameters/);
+	assert.match(yamlToolsText, /yaml-tools-agent/);
+	assert.match(yamlToolsText, /plan-phase-implementer/);
+	console.log("ok: YAML list-style tools frontmatter does not abort discovery");
+
 	// Single mode: past discovery (unknown agent lists package agents, no ctx.cwd TypeError)
 	const single = await execute(
 		"tc-single",
@@ -105,7 +141,26 @@ async function main() {
 	assert.equal(parallel.details?.mode, "parallel");
 	assert.equal(parallel.details?.results?.length, 2);
 	assert.match(parallel.content?.[0]?.text ?? "", /Parallel: 0\/2 succeeded/);
+	assert.equal(parallel.isError, true);
 	console.log("ok: parallel mode passes discovery");
+
+	// Parallel mode: partial failure still marks the batch as error
+	const parallelMixed = await execute(
+		"tc-parallel-mixed",
+		{
+			tasks: [
+				{ agent: "plan-phase-implementer", task: "noop", cwd: path.join(sandbox, "nonexistent-cwd") },
+				{ agent: "nonexistent-b", task: "t2" },
+			],
+		},
+		new AbortController().signal,
+		undefined,
+		ctx,
+	);
+	assert.equal(parallelMixed.details?.mode, "parallel");
+	assert.equal(parallelMixed.details?.results?.length, 2);
+	assert.equal(parallelMixed.isError, true);
+	console.log("ok: parallel mode sets isError when any task fails");
 
 	// Optional: aborted spawn for a real package agent (no credentials required)
 	const abortController = new AbortController();
@@ -135,6 +190,11 @@ async function main() {
 	}
 }
 
-main().catch((e) => {
-	fail(e.message);
-});
+const sandbox = fs.mkdtempSync(path.join(path.dirname(PI_ROOT), "pi-subagent-test-"));
+main(sandbox)
+	.catch((e) => {
+		fail(e.message);
+	})
+	.finally(() => {
+		if (sandbox) fs.rmSync(sandbox, { recursive: true, force: true });
+	});

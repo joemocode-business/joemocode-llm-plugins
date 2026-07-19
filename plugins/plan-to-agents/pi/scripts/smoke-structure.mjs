@@ -66,7 +66,7 @@ function checkPrompts() {
 		const filePath = path.join(promptsDir, name);
 		if (!assertExists(filePath, `prompt ${name}`)) continue;
 		const text = fs.readFileSync(filePath, "utf8");
-		if (!/\*\*subagent\*\*/.test(text) && !/subagent/.test(text)) {
+		if (!/subagent/.test(text)) {
 			// configure/clear-plans use question only
 			if (name === "implement-plan.md" || name === "plan-dispatch.md") {
 				fail(`${name} should reference subagent tool`);
@@ -82,6 +82,51 @@ function checkPrompts() {
 				fail(`${name} contains forbidden token ${pattern}`);
 			}
 		}
+	}
+
+	const implementPlanText = fs.readFileSync(path.join(promptsDir, "implement-plan.md"), "utf8");
+	if (!implementPlanText.includes("git worktree add")) {
+		fail("implement-plan.md must create isolated worktrees");
+	}
+	if (!implementPlanText.includes('"cwd": "<absolute-worktree-path>"')) {
+		fail("implement-plan.md must pass each parallel task its worktree cwd");
+	}
+	if (!implementPlanText.includes("create a fresh `<group-slug>-fix-<n>` branch and worktree")) {
+		fail("implement-plan.md must isolate verifier-failure re-dispatches");
+	}
+	if (!implementPlanText.includes("Only after all successful implementer branches have merged")) {
+		fail("implement-plan.md must merge implementer branches before verification");
+	}
+	if (!implementPlanText.includes("Inspect every task result instead of aborting")) {
+		fail("implement-plan.md must preserve successful branches after a partial failure");
+	}
+
+	const planDispatchText = fs.readFileSync(path.join(promptsDir, "plan-dispatch.md"), "utf8");
+	if (!planDispatchText.includes("git worktree add")) {
+		fail("plan-dispatch.md must create isolated worktrees");
+	}
+	if (!planDispatchText.includes("worktree path in its `cwd` field")) {
+		fail("plan-dispatch.md must pass each Pi subtask its worktree cwd");
+	}
+	if (!planDispatchText.includes("split it into discrete subtasks")) {
+		fail("plan-dispatch.md must decompose the approved plan before dispatch");
+	}
+	if (!planDispatchText.includes("merged plugin config loaded in step 2")) {
+		fail("plan-dispatch.md must resolve headless models from merged config");
+	}
+	if (!planDispatchText.includes("Only then run `plan-verifier`")) {
+		fail("plan-dispatch.md must merge implementer branches before verification");
+	}
+	if (!planDispatchText.includes("create a fresh `<subtask-slug>-fix-<n>` branch and worktree")) {
+		fail("plan-dispatch.md must isolate verifier-failure re-dispatches");
+	}
+
+	const configureText = fs.readFileSync(path.join(promptsDir, "configure.md"), "utf8");
+	if (!configureText.includes("Merge the `harnesses` map per canonical slug")) {
+		fail("configure.md must preserve harness config per canonical slug");
+	}
+	if (!configureText.includes("merge per field")) {
+		fail("configure.md must merge edited harness entries per field");
 	}
 	ok("prompt templates use Pi-native tools");
 }

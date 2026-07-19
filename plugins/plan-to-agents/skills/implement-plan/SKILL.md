@@ -2,8 +2,6 @@
 name: implement-plan
 description: Implement a plan file by orchestrating parallel subagents per phase, then verifying acceptance criteria. Use when the user provides a plan file path (e.g. docs/plans/YYYY-MM-DD-name.md) or names a specific plan to implement. Requires an explicit plan path — do not run without one.
 disable-model-invocation: true
-metadata:
-  opencode/autoinvoke: "false"
 ---
 # Implement Plan
 
@@ -13,7 +11,7 @@ metadata:
 |---------|---------------------|----------------|-----------|
 | Claude Code | `Task` (`plan-phase-implementer`, `plan-verifier`) | `/plan-to-agents:implement-plan` skill | `/plan-to-agents:configure` |
 | Cursor | `Task` (`plan-phase-implementer`, `plan-verifier`) | `/plan-to-agents:implement-plan` skill | `/plan-to-agents:configure` |
-| opencode | `task` (`plan-phase-implementer`, `plan-verifier`) | `/implement-plan` skill (explicit-only; `metadata.opencode/autoinvoke: false`) | `/configure` |
+| opencode | `task` (`plan-phase-implementer`, `plan-verifier`) | `/implement-plan` skill (explicit-only via `permission.skill` denies in merged `opencode.json`; frontmatter honored on Claude Code / Cursor only) | `/configure` |
 | Pi | `subagent` (`plan-phase-implementer`, `plan-verifier`) | `/implement-plan` prompt | `/configure` prompt |
 
 Implement a plan file using parallel subagents for large plans, a single subagent for small plans, then a verifier.

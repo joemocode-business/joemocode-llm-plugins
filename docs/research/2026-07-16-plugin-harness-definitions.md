@@ -534,6 +534,8 @@ main document are preserved as the historical baseline.
 
 ### Still open (manual or follow-up)
 
+- Pi prompt templates (`pi/prompts/`) now inline config schema, validation, and model-resolution content that still lives in `shared/*.md`; consider extending `plugins/plan-to-agents/shared/emit.sh` (which already generates `pi/agents/` from `shared/roles/`) to emit those inlined sections and eliminate drift.
+
 | Item | Status |
 |------|--------|
 | Cursor Team Marketplace import + Auto Refresh | Catalog file exists; Dashboard import and hook behavior after remote install need dogfood verification |
