@@ -1,6 +1,15 @@
 {
   "name": "joemocode-llm-plugins",
-  "keywords": ["pi-package"],
+  "version": "0.1.0",
+  "description": "Reusable agent plugins for Claude Code, Cursor, opencode, and Pi. Abandoned in favor of using Pi exclusively.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joemocode-business/joemocode-llm-plugins"
+  },
+  "author": "Joe Muoio",
+  "homepage": "https://github.com/joemocode-business/joemocode-llm-plugins",
+  "keywords": ["pi-package", "claude-code", "cursor", "opencode", "plugins"],
   "pi": {
     "skills": ["./plugins/*/skills/*"],
     "extensions": [

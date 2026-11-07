@@ -1,0 +1,17 @@
+# Local/tooling state - not part of the published plugin library.
+# These hold per-machine config and internal planning artifacts.
+.claude/
+.cursor/
+plugins/*/.claude/
+
+# Internal planning & research notes (kept local, not shipped).
+docs/plans/
+docs/research/
+plugins/*/docs/plans/
+
+# Node
+node_modules/
+
+# OS / editor cruft
+.DS_Store
+*.local

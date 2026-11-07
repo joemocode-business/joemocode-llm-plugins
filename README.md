@@ -1,5 +1,7 @@
 # joemocode-llm-plugins
 
+> **⚠️ Abandoned.** I've moved on from these Claude Code / Cursor / opencode agent workflows and now use [**Pi**](https://pi.dev/) exclusively. This repo is left up as-is for reference and is **not actively maintained** — no bug fixes, no new features, no updates. Install at your own risk.
+
 Joe's personal plugin library for sharing. Ships reusable agent behavior for [Claude Code](https://code.claude.com/docs/en/quickstart), [Cursor](https://cursor.com), [opencode](https://opencode.ai), and [Pi](https://pi.dev). Claude Code and Cursor install from marketplace manifests; opencode and Pi use harness-specific installers documented in each plugin README.
 
 ## Install (one-time per machine)
@@ -21,7 +23,7 @@ Restart after install so hooks and skills load.
 
 **Native Cursor catalog:** this repo ships [`.cursor-plugin/marketplace.json`](.cursor-plugin/marketplace.json) alongside the Claude catalog. Cursor Team Marketplace import and runtime hook behavior still need manual verification after install (see each plugin README test checklist).
 
-**Private repo:** ensure git credentials work for `joemocode-business/joemocode-llm-plugins` (e.g. `gh auth login`). For Claude Code background updates, set `GITHUB_TOKEN` or `GH_TOKEN` if needed.
+**Install from a public repo:** this repo is public, so no special credentials are needed to install it (`gh auth login` is still required to push changes).
 
 ### opencode and Pi
 
@@ -115,4 +117,4 @@ node --test scripts/validate-marketplace.test.mjs
 
 ## License
 
-This project is licensed under the [Apache License 2.0](./LICENSE).
+This project is licensed under the [MIT License](./LICENSE).
